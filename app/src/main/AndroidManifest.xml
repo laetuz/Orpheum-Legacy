@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="id.neotica.orpheum">
+    
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".OrpheumApp"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name">
+
+        <activity android:name="id.neotica.orpheum.ui.home.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.home.LoginActivity" />
+        <activity android:name=".ui.home.ForgotPasswordActivity" />
+        <activity android:name=".ui.home.RegisterActivity" />
+        <activity android:name=".ui.home.SettingsActivity" />
+    </application>
+
+</manifest>
