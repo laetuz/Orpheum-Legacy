@@ -12,13 +12,15 @@ Built with the same feature-first MVP architecture as HoloMarket (Activity imple
 
 ## local.properties
 
-Required (gitignored). Must define bare values:
+Required (gitignored). Bare values only — no quotes, no `/orpheum` suffix:
 
 ```
-BASE_URL
-FILE_BASE_URL
-AUTH_BASE_URL
+BASE_URL=<api-host>
+FILE_BASE_URL=<storage-host>
+AUTH_BASE_URL=<api-host>
 ```
+
+`BASE_URL` is the host; the app appends `/orpheum` (catalog/stream/media) itself. (A trailing `/orpheum` is stripped defensively, but set the host only.)
 
 ## Build
 
@@ -34,12 +36,12 @@ AGP 2.3.2 is resolved from JCenter mirrors (Aliyun + Huawei Cloud) configured in
 - **CI** (`.github/workflows/ci.yml`) — builds a debug APK and runs the unit tests on pushes and pull requests to `main`/`master`. The APK is uploaded as the `orpheum-debug` workflow artifact.
 - **Release** (`.github/workflows/release.yml`) — runs on `v*` tags and via manual dispatch. It builds a release APK, verifies the signature, uploads an artifact, and attaches `Orpheum-<tag>.apk` to the GitHub Release. Tags of the form `v<versionName>.<suffix>` (e.g. `v1.0.1`) are accepted as test builds and published as **prereleases**.
 
-Both workflows inject `local.properties` from repository secrets (Settings → Secrets and variables → Actions), using bare URLs without quotes:
+Both workflows inject `local.properties` from repository secrets (Settings → Secrets and variables → Actions), using bare URLs without quotes (the workflow adds the quotes):
 
 ```
-BASE_URL
-FILE_BASE_URL
-AUTH_BASE_URL
+BASE_URL=<api-host>      # host only — no /orpheum
+FILE_BASE_URL=<storage-host>
+AUTH_BASE_URL=<api-host>
 ```
 
 Release flow:

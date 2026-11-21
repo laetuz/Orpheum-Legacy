@@ -15,6 +15,9 @@ public class ImageUrlHelper {
         if (path.startsWith("http://") || path.startsWith("https://")) {
             return path;
         }
+        if (path.startsWith("/media/")) {
+            return Constants.ORPHEUM_BASE + path;
+        }
         if (path.startsWith("/buckets")) {
             return BuildConfig.FILE_BASE_URL + path;
         }

@@ -3,7 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:padding="12dp">
+
+    <ImageView
+        android:id="@+id/iv_track_cover"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="12dp"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/sym_def_app_icon" />
 
     <TextView
         android:id="@+id/tv_track_number"
@@ -12,7 +21,6 @@
         android:layout_marginRight="12dp"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:gravity="center_vertical"
         android:minWidth="24dp" />
 
     <LinearLayout
@@ -43,7 +51,6 @@
         android:id="@+id/tv_track_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:gravity="center_vertical" />
+        android:textSize="14sp" />
 
 </LinearLayout>
