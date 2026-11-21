@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:background="#FF333333">
+
+    <ImageButton
+        android:id="@+id/top_bar_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="start"
+        android:background="@drawable/bg_focusable"
+        android:src="@android:drawable/ic_menu_revert"
+        android:scaleType="center"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/top_bar_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:paddingLeft="56dp"
+        android:paddingRight="56dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <ImageButton
+        android:id="@+id/top_bar_action"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="end"
+        android:background="@drawable/bg_focusable"
+        android:scaleType="center"
+        android:visibility="gone" />
+
+</FrameLayout>

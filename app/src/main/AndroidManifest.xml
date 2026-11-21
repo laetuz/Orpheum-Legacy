@@ -1,29 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="id.neotica.orpheum">
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".OrpheumApp"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
 
-        <activity android:name="id.neotica.orpheum.ui.home.MainActivity">
+        <activity android:name=".feature.home.ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.home.LoginActivity" />
-        <activity android:name=".ui.home.ForgotPasswordActivity" />
-        <activity android:name=".ui.home.RegisterActivity" />
-        <activity android:name=".ui.home.SettingsActivity" />
-        <activity android:name=".ui.feed.TrackFeedActivity" />
-        <activity android:name=".ui.feed.AlbumFeedActivity" />
-        <activity android:name=".ui.feed.SearchActivity" />
-        <activity android:name=".ui.feed.AlbumDetailActivity" />
-        <activity android:name=".ui.player.PlayerActivity" />
+        <activity android:name=".feature.auth.login.ui.LoginActivity" />
+        <activity android:name=".feature.auth.forgotpassword.ui.ForgotPasswordActivity" />
+        <activity android:name=".feature.auth.register.ui.RegisterActivity" />
+        <activity android:name=".feature.settings.ui.SettingsActivity" />
+        <activity android:name=".feature.trackfeed.ui.TrackFeedActivity" />
+        <activity android:name=".feature.albumfeed.ui.AlbumFeedActivity" />
+        <activity
+            android:name=".feature.search.ui.SearchActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".feature.albumdetail.ui.AlbumDetailActivity" />
+        <activity android:name=".feature.player.ui.PlayerActivity" />
+
+        <service
+            android:name=".feature.player.service.AudioService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".feature.player.service.NotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="id.neotica.orpheum.action.PLAY_PAUSE" />
+                <action android:name="id.neotica.orpheum.action.NEXT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

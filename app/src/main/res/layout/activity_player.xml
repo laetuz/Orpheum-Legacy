@@ -1,92 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_track_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:singleLine="true"
-        android:ellipsize="end" />
-
-    <TextView
-        android:id="@+id/tv_track_artist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="32dp"
-        android:singleLine="true"
-        android:ellipsize="end" />
+    <include layout="@layout/top_bar" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
-
-        <TextView
-            android:id="@+id/tv_current_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:text="0:00" />
-
-        <SeekBar
-            android:id="@+id/seek_bar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:max="100" />
-
-        <TextView
-            android:id="@+id/tv_total_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:text="0:00" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginTop="24dp">
+        android:padding="32dp">
 
-        <ImageButton
-            android:id="@+id/btn_prev"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@android:drawable/ic_media_previous"
-            android:scaleType="center" />
+        <TextView
+            android:id="@+id/tv_track_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
-        <ImageButton
-            android:id="@+id/btn_play_pause"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@android:drawable/ic_media_play"
-            android:scaleType="center"
-            android:layout_marginLeft="24dp"
-            android:layout_marginRight="24dp" />
+        <TextView
+            android:id="@+id/tv_track_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="32dp"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
-        <ImageButton
-            android:id="@+id/btn_next"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@android:drawable/ic_media_next"
-            android:scaleType="center" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <TextView
+                android:id="@+id/tv_current_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="0:00" />
+
+            <SeekBar
+                android:id="@+id/seek_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:max="100" />
+
+            <TextView
+                android:id="@+id/tv_total_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="0:00" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="24dp">
+
+            <ImageButton
+                android:id="@+id/btn_prev"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_media_previous"
+                android:scaleType="center" />
+
+            <ImageButton
+                android:id="@+id/btn_play_pause"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@android:drawable/ic_media_play"
+                android:scaleType="center"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp" />
+
+            <ImageButton
+                android:id="@+id/btn_next"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@android:drawable/ic_media_next"
+                android:scaleType="center" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

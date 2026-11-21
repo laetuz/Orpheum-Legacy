@@ -1,6 +1,10 @@
 package id.neotica.orpheum.model;
 
+import org.json.JSONObject;
+
 import java.io.Serializable;
+
+import id.neotica.orpheum.utils.JsonHelper;
 
 public class Track implements Serializable {
 
@@ -22,5 +26,20 @@ public class Track implements Serializable {
         this.fileUrl = fileUrl;
         this.trackNumber = trackNumber;
         this.artistName = artistName;
+    }
+
+    public static Track fromJson(JSONObject obj) {
+        if (obj == null) {
+            return null;
+        }
+        return new Track(
+                JsonHelper.getString(obj, "id"),
+                JsonHelper.getString(obj, "album_id"),
+                JsonHelper.getString(obj, "title"),
+                JsonHelper.getInt(obj, "duration_seconds", 0),
+                JsonHelper.getString(obj, "file_url"),
+                JsonHelper.getInt(obj, "track_number", 0),
+                JsonHelper.getString(obj, "artist_name")
+        );
     }
 }

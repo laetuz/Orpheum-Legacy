@@ -1,60 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="32dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <include layout="@layout/top_bar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:text="Orpheum" />
+        android:padding="32dp">
 
-    <Button
-        android:id="@+id/btn_login"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Login" />
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:gravity="center"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/btn_register"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Register" />
+        <Button
+            android:id="@+id/btn_login"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/common_login" />
 
-    <Button
-        android:id="@+id/btn_tracks"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/new_tracks" />
+        <Button
+            android:id="@+id/btn_register"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/common_register" />
 
-    <Button
-        android:id="@+id/btn_albums"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/new_releases" />
+        <Button
+            android:id="@+id/btn_tracks"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_tracks" />
 
-    <Button
-        android:id="@+id/btn_search"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/search" />
+        <Button
+            android:id="@+id/btn_albums"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_releases" />
 
-    <Button
-        android:id="@+id/btn_settings"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Settings" />
+        <Button
+            android:id="@+id/btn_search"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/search" />
+
+    </LinearLayout>
 
 </LinearLayout>

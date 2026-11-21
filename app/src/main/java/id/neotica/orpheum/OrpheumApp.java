@@ -12,9 +12,16 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 public class OrpheumApp extends Application {
 
+    private static OrpheumApp instance;
+
+    public static OrpheumApp getInstance() {
+        return instance;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
 
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
                 .cacheInMemory(true)

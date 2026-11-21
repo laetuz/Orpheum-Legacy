@@ -1,5 +1,9 @@
 package id.neotica.orpheum.model;
 
+import org.json.JSONObject;
+
+import id.neotica.orpheum.utils.JsonHelper;
+
 public class Album {
 
     public String id;
@@ -18,5 +22,20 @@ public class Album {
         this.coverUrl = coverUrl;
         this.artistName = artistName;
         this.createdAt = createdAt;
+    }
+
+    public static Album fromJson(JSONObject obj) {
+        if (obj == null) {
+            return null;
+        }
+        return new Album(
+                JsonHelper.getString(obj, "id"),
+                JsonHelper.getString(obj, "artist_id"),
+                JsonHelper.getString(obj, "title"),
+                JsonHelper.getInt(obj, "release_year", 0),
+                JsonHelper.getString(obj, "cover_url"),
+                JsonHelper.getString(obj, "artist_name"),
+                JsonHelper.getString(obj, "created_at")
+        );
     }
 }
