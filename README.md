@@ -4,6 +4,13 @@ Legacy Android music streaming app targeting **Android 1.5+ (API 3, Cupcake)** â
 
 Built with the same feature-first MVP architecture as HoloMarket (Activity implements a View contract, Presenter owns state/networking/parsing; AsyncTask + HttpURLConnection, ListView + ArrayAdapter), with feeds adapted from OrpheumUploader.
 
+## Features
+
+- Auth (login, register, password reset) with password visibility toggle
+- Home feed with recent albums and recent tracks (`GET /home`)
+- New tracks / new releases feeds, search, album detail
+- Streaming playback with queue, seek, previous/next, a background notification, and a persistent Now Playing bar
+
 ## Prerequisites
 
 - JDK 8 (Gradle 3.5 will not run on newer JDKs)

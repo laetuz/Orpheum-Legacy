@@ -2,6 +2,7 @@ package id.neotica.orpheum.feature.search.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -29,6 +30,8 @@ import id.neotica.orpheum.utils.CrashCatcher;
 import id.neotica.orpheum.utils.TopBarHelper;
 
 public class SearchActivity extends Activity implements SearchView {
+
+    public static final String EXTRA_SEARCH_QUERY = "search_query";
 
     private EditText etSearch;
     private ListView listView;
@@ -102,6 +105,15 @@ public class SearchActivity extends Activity implements SearchView {
         });
 
         NowPlayingBarHelper.setup(this);
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(EXTRA_SEARCH_QUERY)) {
+            String initialQuery = intent.getStringExtra(EXTRA_SEARCH_QUERY);
+            if (!TextUtils.isEmpty(initialQuery)) {
+                etSearch.setText(initialQuery);
+                performSearch();
+            }
+        }
     }
 
     @Override

@@ -14,6 +14,7 @@ public class Constants {
     public static final String ALBUM_FEED_URL = ORPHEUM_BASE + "/catalog/new-releases";
     public static final String SEARCH_URL = ORPHEUM_BASE + "/catalog/search";
     public static final String ALBUM_DETAIL_URL = ORPHEUM_BASE + "/albums/";
+    public static final String HOME_URL = ORPHEUM_BASE + "/home";
 
     private static String normalizeBase(String url) {
         if (url == null) {
