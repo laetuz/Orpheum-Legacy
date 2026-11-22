@@ -49,6 +49,7 @@ Both workflows inject `local.properties` from repository secrets (Settings → S
 BASE_URL=<api-host>      # host only — no /orpheum
 FILE_BASE_URL=<storage-host>
 AUTH_BASE_URL=<api-host>
+KEYSTORE_BASE64          # base64 of ~/.android/debug.keystore (stable signing)
 ```
 
 Release flow:
@@ -58,4 +59,4 @@ Release flow:
 3. `git tag vX.Y.Z && git push origin vX.Y.Z`.
 4. The workflow builds `Orpheum-vX.Y.Z.apk` and attaches it to the GitHub Release.
 
-> Release APKs are debug-signed for now (`signingConfig signingConfigs.debug`). A different signing key means installing over an existing build requires uninstalling first; real signing will be added later.
+> Release APKs use the project debug key (`signingConfig signingConfigs.debug`), seeded in CI from the `KEYSTORE_BASE64` secret, so every build shares one stable signature. Installing over a build made before v1.2.1 requires one uninstall; afterwards updates work normally as long as `versionCode` increases.
