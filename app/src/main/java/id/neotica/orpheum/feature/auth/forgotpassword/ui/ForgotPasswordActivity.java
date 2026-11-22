@@ -2,7 +2,9 @@ package id.neotica.orpheum.feature.auth.forgotpassword.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -33,6 +35,15 @@ public class ForgotPasswordActivity extends Activity implements ForgotPasswordVi
 
         etEmail = (EditText) findViewById(R.id.et_forgot_email);
         Button btnSend = (Button) findViewById(R.id.btn_send_reset_link);
+
+        findViewById(R.id.layout_root).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+            }
+        });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override

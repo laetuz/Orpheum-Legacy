@@ -2,12 +2,15 @@ package id.neotica.orpheum.feature.auth.register.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import id.neotica.orpheum.R;
+import id.neotica.orpheum.feature.auth.common.ui.PasswordEyeToggle;
 import id.neotica.orpheum.feature.auth.register.contract.RegisterView;
 import id.neotica.orpheum.feature.auth.register.presenter.RegisterPresenter;
 import id.neotica.orpheum.utils.CrashCatcher;
@@ -37,6 +40,17 @@ public class RegisterActivity extends Activity implements RegisterView {
         etEmail = (EditText) findViewById(R.id.et_register_email);
         etPassword = (EditText) findViewById(R.id.et_register_password);
         Button btnRegister = (Button) findViewById(R.id.btn_register);
+
+        PasswordEyeToggle.attach(etPassword, R.drawable.ic_eye_open, R.drawable.ic_eye_closed);
+
+        findViewById(R.id.layout_root).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+            }
+        });
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override

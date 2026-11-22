@@ -3,13 +3,16 @@ package id.neotica.orpheum.feature.auth.login.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import id.neotica.orpheum.R;
+import id.neotica.orpheum.feature.auth.common.ui.PasswordEyeToggle;
 import id.neotica.orpheum.feature.auth.forgotpassword.ui.ForgotPasswordActivity;
 import id.neotica.orpheum.feature.auth.login.contract.LoginView;
 import id.neotica.orpheum.feature.auth.login.presenter.LoginPresenter;
@@ -42,6 +45,17 @@ public class LoginActivity extends Activity implements LoginView {
         Button btnLogin = (Button) findViewById(R.id.btn_login);
         Button btnRegister = (Button) findViewById(R.id.btn_register);
         TextView tvForgotPassword = (TextView) findViewById(R.id.tv_forgot_password);
+
+        PasswordEyeToggle.attach(etPassword, R.drawable.ic_eye_open, R.drawable.ic_eye_closed);
+
+        findViewById(R.id.layout_root).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                return false;
+            }
+        });
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override

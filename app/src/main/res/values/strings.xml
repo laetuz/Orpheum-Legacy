@@ -13,8 +13,8 @@
     <string name="album_detail">Album</string>
 
     <!-- Screen titles -->
-    <string name="auth_login_title">Login</string>
-    <string name="auth_register_title">Register</string>
+    <string name="auth_login_title">Sign In</string>
+    <string name="auth_register_title">Create Account</string>
     <string name="auth_forgot_title">Forgot Password</string>
     <string name="settings_title">Settings</string>
     <string name="player_title">Now Playing</string>
@@ -22,6 +22,7 @@
     <!-- Auth -->
     <string name="auth_login_prompt">Sign in to continue</string>
     <string name="auth_forgot_prompt">Enter your email to receive a reset link</string>
+    <string name="auth_forgot_send">Send Reset Link</string>
     <string name="common_username">Username</string>
     <string name="common_password">Password</string>
     <string name="common_email">Email</string>
@@ -29,6 +30,11 @@
     <string name="common_register">Register</string>
     <string name="common_logout">Logout</string>
     <string name="auth_login_forgot">Forgot Password?</string>
+
+    <!-- Home -->
+    <string name="home_recent_albums">Recent Albums</string>
+    <string name="home_recent_tracks">Recent Tracks</string>
+    <string name="home_see_all">See all</string>
 
     <!-- Errors -->
     <string name="common_error_enter_username">Enter username</string>
