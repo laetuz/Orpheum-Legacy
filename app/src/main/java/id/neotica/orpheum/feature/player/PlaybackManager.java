@@ -6,14 +6,16 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import id.neotica.orpheum.BuildConfig;
 import id.neotica.orpheum.OrpheumApp;
+import id.neotica.orpheum.feature.downloads.DownloadStore;
 import id.neotica.orpheum.feature.player.service.AudioService;
 import id.neotica.orpheum.model.Track;
+import id.neotica.orpheum.utils.Constants;
 
 /**
  * Static playback facade: owns the MediaPlayer, the queue and the listener list.
@@ -63,13 +65,22 @@ public class PlaybackManager {
 
         releaseMediaPlayer();
 
-        String url = BuildConfig.BASE_URL + "/orpheum/stream/" + track.id;
+        String source = track.localPath;
+        if (!TextUtils.isEmpty(source) && !new File(source).exists()) {
+            source = null;
+        }
+        if (TextUtils.isEmpty(source)) {
+            source = DownloadStore.findTrackFile(track.id);
+        }
+        if (TextUtils.isEmpty(source)) {
+            source = Constants.ORPHEUM_BASE + "/stream/" + track.id;
+        }
 
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
-            mediaPlayer.setDataSource(url);
+            mediaPlayer.setDataSource(source);
             mediaPlayer.prepareAsync();
 
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {

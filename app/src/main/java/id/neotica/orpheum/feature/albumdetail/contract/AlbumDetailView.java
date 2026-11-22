@@ -15,5 +15,7 @@ public interface AlbumDetailView {
 
     void renderTracks(List<Track> tracks);
 
+    void renderDownloadAction(boolean downloaded, boolean downloading, int done, int total);
+
     void showError(String message);
 }

@@ -99,6 +99,13 @@
 
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/btn_downloads"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/downloads_title" />
+
                 <LinearLayout
                     android:id="@+id/section_albums"
                     android:layout_width="match_parent"

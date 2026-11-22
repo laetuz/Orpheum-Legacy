@@ -10,6 +10,7 @@ Built with the same feature-first MVP architecture as HoloMarket (Activity imple
 - Home feed with recent albums and recent tracks (`GET /home`)
 - New tracks / new releases feeds, search, album detail
 - Streaming playback with queue, seek, previous/next, spinning album art, a queue dialog, a background notification, and a persistent Now Playing bar
+- Offline mode: download an album (tracks + cover) and play it from disk; downloads are managed from the home screen's Downloads list
 
 ## Prerequisites
 

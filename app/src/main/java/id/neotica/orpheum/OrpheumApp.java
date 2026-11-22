@@ -6,6 +6,8 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import id.neotica.orpheum.feature.downloads.DownloadStore;
+
 /**
  * Created by ryomartin on 08/04/26.
  */
@@ -22,6 +24,8 @@ public class OrpheumApp extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+
+        DownloadStore.recoverInterrupted();
 
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
                 .cacheInMemory(true)

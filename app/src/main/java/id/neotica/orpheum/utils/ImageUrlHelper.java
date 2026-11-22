@@ -12,6 +12,9 @@ public class ImageUrlHelper {
         if (TextUtils.isEmpty(path)) {
             return "";
         }
+        if (path.startsWith("file://")) {
+            return path;
+        }
         if (path.startsWith("http://") || path.startsWith("https://")) {
             return path;
         }

@@ -18,6 +18,7 @@ public class Track implements Serializable {
     public int trackNumber;
     public String artistName;
     public String albumCover;
+    public String localPath;
 
     public Track(String id, String albumId, String title, int durationSeconds, String fileUrl, int trackNumber, String artistName, String albumCover) {
         this.id = id;
