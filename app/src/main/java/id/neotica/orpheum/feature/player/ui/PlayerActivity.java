@@ -2,6 +2,7 @@ package id.neotica.orpheum.feature.player.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -304,10 +306,11 @@ public class PlayerActivity extends Activity implements PlayerView {
             labels[i] = label;
         }
 
-        new AlertDialog.Builder(this)
+        Context dialogContext = new ContextThemeWrapper(this, R.style.AppDialogTheme);
+        new AlertDialog.Builder(dialogContext)
                 .setTitle(R.string.player_queue)
                 .setAdapter(
-                        new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, labels),
+                        new ArrayAdapter<String>(dialogContext, android.R.layout.simple_list_item_1, labels),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
