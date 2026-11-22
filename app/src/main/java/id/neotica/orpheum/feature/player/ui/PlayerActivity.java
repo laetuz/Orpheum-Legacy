@@ -107,7 +107,7 @@ public class PlayerActivity extends Activity implements PlayerView {
 
         coverSizePx = getResources().getDimensionPixelSize(R.dimen.player_cover_size);
         coverOptions = new DisplayImageOptions.Builder()
-                .displayer(new CircularBitmapDisplayer())
+                .displayer(new CircularBitmapDisplayer(coverSizePx))
                 .cacheInMemory(true)
                 .build();
 

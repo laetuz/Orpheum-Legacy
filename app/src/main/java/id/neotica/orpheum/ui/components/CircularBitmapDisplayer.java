@@ -3,6 +3,7 @@ package id.neotica.orpheum.ui.components;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader;
@@ -13,27 +14,66 @@ import com.nostra13.universalimageloader.core.display.BitmapDisplayer;
 import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 
 /**
- * Draws the loaded bitmap as a circle while keeping a real intrinsic size
- * ({@link BitmapDrawable} derives it from the bitmap). That lets an
- * {@code ImageView} with {@code scaleType="matrix"} apply rotations — UIL's
- * built-in rounded drawable has no intrinsic size, so the matrix is ignored.
+ * Draws the loaded bitmap as a circle pinned to a fixed intrinsic size so an
+ * {@code ImageView} with {@code scaleType="matrix"} keeps its bounds (and can
+ * rotate it). The bitmap itself is center-cropped into those bounds, so a
+ * decoded image larger than the view no longer overflows.
  */
 public class CircularBitmapDisplayer implements BitmapDisplayer {
 
-    public CircularBitmapDisplayer() { }
+    private final int targetSizePx;
+
+    public CircularBitmapDisplayer(int targetSizePx) {
+        this.targetSizePx = targetSizePx;
+    }
 
     @Override
     public void display(Bitmap bitmap, ImageAware imageAware, LoadedFrom loadedFrom) {
-        imageAware.setImageDrawable(new CircleDrawable(bitmap));
+        imageAware.setImageDrawable(new CircleDrawable(bitmap, targetSizePx));
     }
 
     private static class CircleDrawable extends BitmapDrawable {
 
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final BitmapShader shader;
+        private final int targetSizePx;
 
-        CircleDrawable(Bitmap bitmap) {
+        CircleDrawable(Bitmap bitmap, int targetSizePx) {
             super(bitmap);
-            paint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+            this.targetSizePx = targetSizePx;
+            shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            paint.setShader(shader);
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return targetSizePx;
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return targetSizePx;
+        }
+
+        @Override
+        protected void onBoundsChange(Rect bounds) {
+            super.onBoundsChange(bounds);
+
+            Bitmap bitmap = getBitmap();
+            if (bitmap == null || bounds.width() <= 0 || bounds.height() <= 0) {
+                return;
+            }
+
+            float scale = Math.max(
+                    (float) bounds.width() / bitmap.getWidth(),
+                    (float) bounds.height() / bitmap.getHeight());
+            float dx = bounds.left + (bounds.width() - bitmap.getWidth() * scale) / 2f;
+            float dy = bounds.top + (bounds.height() - bitmap.getHeight() * scale) / 2f;
+
+            Matrix matrix = new Matrix();
+            matrix.setScale(scale, scale);
+            matrix.postTranslate(dx, dy);
+            shader.setLocalMatrix(matrix);
         }
 
         @Override
