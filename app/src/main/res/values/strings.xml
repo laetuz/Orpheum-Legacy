@@ -18,6 +18,7 @@
     <string name="auth_forgot_title">Forgot Password</string>
     <string name="settings_title">Settings</string>
     <string name="player_title">Now Playing</string>
+    <string name="player_queue">Queue</string>
 
     <!-- Auth -->
     <string name="auth_login_prompt">Sign in to continue</string>

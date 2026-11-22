@@ -9,7 +9,7 @@ Built with the same feature-first MVP architecture as HoloMarket (Activity imple
 - Auth (login, register, password reset) with password visibility toggle
 - Home feed with recent albums and recent tracks (`GET /home`)
 - New tracks / new releases feeds, search, album detail
-- Streaming playback with queue, seek, previous/next, a background notification, and a persistent Now Playing bar
+- Streaming playback with queue, seek, previous/next, spinning album art, a queue dialog, a background notification, and a persistent Now Playing bar
 
 ## Prerequisites
 

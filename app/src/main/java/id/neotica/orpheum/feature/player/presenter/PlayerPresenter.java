@@ -91,6 +91,18 @@ public class PlayerPresenter implements PlaybackManager.PlaybackListener {
         this.userSeeking = seeking;
     }
 
+    public ArrayList<Track> getQueue() {
+        return PlaybackManager.getQueue();
+    }
+
+    public int getCurrentIndex() {
+        return PlaybackManager.getCurrentIndex();
+    }
+
+    public void playAt(int index) {
+        PlaybackManager.playAt(index);
+    }
+
     @Override
     public void onTrackChanged() {
         pushTrack();

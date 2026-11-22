@@ -182,6 +182,25 @@ public class PlaybackManager {
         return null;
     }
 
+    public static ArrayList<Track> getQueue() {
+        if (queue == null) {
+            return new ArrayList<Track>();
+        }
+        return new ArrayList<Track>(queue);
+    }
+
+    public static int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    public static void playAt(int index) {
+        if (queue == null || index < 0 || index >= queue.size()) {
+            return;
+        }
+        currentIndex = index;
+        playTrack();
+    }
+
     public static boolean isPrepared() {
         return isPrepared;
     }
