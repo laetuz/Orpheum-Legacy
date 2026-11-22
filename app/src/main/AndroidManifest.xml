@@ -29,6 +29,7 @@
         <activity android:name=".feature.albumdetail.ui.AlbumDetailActivity" />
         <activity android:name=".feature.downloads.ui.DownloadsActivity" />
         <activity android:name=".feature.radio.ui.RadioActivity" />
+        <activity android:name=".feature.radio.ui.FavoritesActivity" />
         <activity android:name=".feature.player.ui.PlayerActivity" />
 
         <service

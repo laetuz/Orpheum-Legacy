@@ -38,4 +38,12 @@
             android:ellipsize="end" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/iv_radio_favorite"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="8dp"
+        android:src="@android:drawable/btn_star_big_on"
+        android:visibility="gone" />
+
 </LinearLayout>

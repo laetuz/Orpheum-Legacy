@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.List;
 
 import id.neotica.orpheum.R;
+import id.neotica.orpheum.feature.radio.FavoriteStationStore;
 import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.utils.ImageUrlHelper;
 
@@ -25,6 +26,7 @@ public class RadioAdapter extends ArrayAdapter<RadioItem> {
 
     private static class ViewHolder {
         ImageView ivLogo;
+        ImageView ivFavorite;
         TextView tvName;
         TextView tvDescription;
     }
@@ -38,6 +40,7 @@ public class RadioAdapter extends ArrayAdapter<RadioItem> {
             vh = new ViewHolder();
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_radio, parent, false);
             vh.ivLogo = (ImageView) convertView.findViewById(R.id.iv_radio_logo);
+            vh.ivFavorite = (ImageView) convertView.findViewById(R.id.iv_radio_favorite);
             vh.tvName = (TextView) convertView.findViewById(R.id.tv_radio_name);
             vh.tvDescription = (TextView) convertView.findViewById(R.id.tv_radio_description);
             convertView.setTag(vh);
@@ -48,6 +51,10 @@ public class RadioAdapter extends ArrayAdapter<RadioItem> {
         if (item != null) {
             vh.tvName.setText(item.name);
             vh.tvDescription.setText(!TextUtils.isEmpty(item.description) ? item.description : "");
+
+            boolean favorite = item.type == RadioItem.TYPE_STATION
+                    && FavoriteStationStore.isFavorite(item.guideId);
+            vh.ivFavorite.setVisibility(favorite ? View.VISIBLE : View.GONE);
 
             if (!TextUtils.isEmpty(item.imageUrl)) {
                 ImageLoader.getInstance().displayImage(ImageUrlHelper.build(item.imageUrl), vh.ivLogo);

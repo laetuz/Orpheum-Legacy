@@ -59,6 +59,13 @@
     <string name="radio_unavailable">Station unavailable. Try another.</string>
     <string name="radio_no_results">No stations found.</string>
     <string name="radio_powered_by">Powered by TuneIn</string>
+    <string name="radio_favorites_title">Favorites</string>
+    <string name="radio_favorite_added">Added to favorites</string>
+    <string name="radio_favorite_removed">Removed from favorites</string>
+    <string name="radio_favorites_empty">No favorite stations yet.</string>
+    <string name="radio_favorite_remove">Remove favorite</string>
+    <string name="radio_favorite_remove_confirm">Remove %1$s from favorites?</string>
+    <string name="common_remove">Remove</string>
 
     <!-- Errors -->
     <string name="common_error_enter_username">Enter username</string>

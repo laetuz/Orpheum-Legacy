@@ -11,7 +11,7 @@ Built with the same feature-first MVP architecture as HoloMarket (Activity imple
 - New tracks / new releases feeds, search, album detail
 - Streaming playback with queue, seek, previous/next, spinning album art, a queue dialog, a background notification, and a persistent Now Playing bar
 - Offline mode: download an album (tracks + cover) and play it from disk; downloads are managed from the home screen's Downloads list
-- Internet radio: browse and search TuneIn stations (via `opml.radiotime.com`) and play them as live streams in the same player
+- Internet radio: browse and search TuneIn stations (via `opml.radiotime.com`), play them as live streams in the same player, and keep favorite stations locally
 
 ## Prerequisites
 

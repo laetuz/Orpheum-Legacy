@@ -20,11 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import id.neotica.orpheum.R;
-import id.neotica.orpheum.feature.player.ui.PlayerActivity;
+import id.neotica.orpheum.feature.radio.FavoriteStationStore;
 import id.neotica.orpheum.feature.radio.contract.RadioView;
 import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.feature.radio.presenter.RadioPresenter;
-import id.neotica.orpheum.model.Track;
 import id.neotica.orpheum.ui.components.NowPlayingBarHelper;
 import id.neotica.orpheum.utils.Constants;
 import id.neotica.orpheum.utils.CrashCatcher;
@@ -53,7 +52,13 @@ public class RadioActivity extends Activity implements RadioView {
         if (TextUtils.isEmpty(title)) {
             title = getString(R.string.radio_title);
         }
-        TopBarHelper.setup(this, title, true);
+        TopBarHelper.setup(this, title, true, android.R.drawable.btn_star_big_on,
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(RadioActivity.this, FavoritesActivity.class));
+                    }
+                });
 
         presenter = new RadioPresenter(this);
         presenter.attach(this);
@@ -98,6 +103,22 @@ public class RadioActivity extends Activity implements RadioView {
             }
         });
 
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                RadioItem item = adapter.getItem(position);
+                if (item == null || item.type != RadioItem.TYPE_STATION) {
+                    return false;
+                }
+                boolean favorite = FavoriteStationStore.toggle(item);
+                Toast.makeText(RadioActivity.this,
+                        favorite ? R.string.radio_favorite_added : R.string.radio_favorite_removed,
+                        Toast.LENGTH_SHORT).show();
+                adapter.notifyDataSetChanged();
+                return true;
+            }
+        });
+
         NowPlayingBarHelper.setup(this);
 
         presenter.load(!TextUtils.isEmpty(pageUrl) ? pageUrl : Constants.TUNEIN_BROWSE_URL);
@@ -106,6 +127,9 @@ public class RadioActivity extends Activity implements RadioView {
     @Override
     protected void onResume() {
         super.onResume();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
         NowPlayingBarHelper.refresh(this);
     }
 
@@ -138,14 +162,7 @@ public class RadioActivity extends Activity implements RadioView {
 
     @Override
     public void playStation(RadioItem station, String streamUrl) {
-        Track track = new Track(station.guideId, "", station.name, 0, "", 0,
-                !TextUtils.isEmpty(station.description) ? station.description : "",
-                station.imageUrl);
-        track.streamUrl = streamUrl;
-
-        ArrayList<Track> queue = new ArrayList<Track>();
-        queue.add(track);
-        startActivity(PlayerActivity.createIntent(this, queue, 0));
+        RadioPlaybackHelper.play(this, station, streamUrl);
     }
 
     @Override
