@@ -28,6 +28,7 @@ import id.neotica.orpheum.feature.downloads.ui.DownloadsActivity;
 import id.neotica.orpheum.feature.home.contract.HomeView;
 import id.neotica.orpheum.feature.home.presenter.HomePresenter;
 import id.neotica.orpheum.feature.player.ui.PlayerActivity;
+import id.neotica.orpheum.feature.radio.ui.RadioActivity;
 import id.neotica.orpheum.feature.search.ui.SearchActivity;
 import id.neotica.orpheum.feature.settings.ui.SettingsActivity;
 import id.neotica.orpheum.feature.trackfeed.ui.TrackFeedActivity;
@@ -109,6 +110,13 @@ public class MainActivity extends Activity implements HomeView {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MainActivity.this, DownloadsActivity.class));
+            }
+        });
+
+        findViewById(R.id.btn_radio).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, RadioActivity.class));
             }
         });
 

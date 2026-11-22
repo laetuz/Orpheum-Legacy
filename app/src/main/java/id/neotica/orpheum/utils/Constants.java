@@ -16,6 +16,11 @@ public class Constants {
     public static final String ALBUM_DETAIL_URL = ORPHEUM_BASE + "/albums/";
     public static final String HOME_URL = ORPHEUM_BASE + "/home";
 
+    public static final String TUNEIN_BASE = "http://opml.radiotime.com";
+    public static final String TUNEIN_BROWSE_URL = TUNEIN_BASE + "/Browse.ashx";
+    public static final String TUNEIN_SEARCH_URL = TUNEIN_BASE + "/Search.ashx";
+    public static final String TUNEIN_TUNE_URL = TUNEIN_BASE + "/Tune.ashx";
+
     private static String normalizeBase(String url) {
         if (url == null) {
             return "";

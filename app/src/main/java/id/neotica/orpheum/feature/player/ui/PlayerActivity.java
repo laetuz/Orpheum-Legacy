@@ -52,6 +52,8 @@ public class PlayerActivity extends Activity implements PlayerView {
     private SeekBar seekBar;
     private ImageButton btnPlayPause;
     private ImageView ivCover;
+    private View seekRow;
+    private boolean isLive;
 
     private int coverSizePx;
     private DisplayImageOptions coverOptions;
@@ -104,6 +106,7 @@ public class PlayerActivity extends Activity implements PlayerView {
         ImageButton btnPrev = (ImageButton) findViewById(R.id.btn_prev);
         ImageButton btnNext = (ImageButton) findViewById(R.id.btn_next);
         ivCover = (ImageView) findViewById(R.id.iv_player_cover);
+        seekRow = findViewById(R.id.player_seek_row);
 
         coverSizePx = getResources().getDimensionPixelSize(R.dimen.player_cover_size);
         coverOptions = new DisplayImageOptions.Builder()
@@ -185,6 +188,9 @@ public class PlayerActivity extends Activity implements PlayerView {
 
     @Override
     public void renderTrack(Track track) {
+        isLive = !TextUtils.isEmpty(track.streamUrl);
+        seekRow.setVisibility(isLive ? View.GONE : View.VISIBLE);
+
         tvTitle.setText(track.title);
         tvArtist.setText(!TextUtils.isEmpty(track.artistName) ? track.artistName : "");
         tvTotalTime.setText(TimeFormatHelper.formatDuration(track.durationSeconds));
@@ -236,6 +242,9 @@ public class PlayerActivity extends Activity implements PlayerView {
 
     @Override
     public void renderProgress(int positionMs, int durationMs) {
+        if (isLive) {
+            return;
+        }
         if (durationMs > 0) {
             seekBar.setProgress((int) ((long) positionMs * 100 / durationMs));
             tvTotalTime.setText(TimeFormatHelper.formatDuration(durationMs / 1000));

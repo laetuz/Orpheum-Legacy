@@ -38,8 +38,7 @@
     <string name="home_see_all">See all</string>
 
     <!-- Downloads -->
-    <string name="downloads_title">Downloads</string>
-    <string name="downloads_download">Download</string>
+    <string name="downloads_title">Downloads</string>    <string name="downloads_download">Download</string>
     <string name="downloads_delete">Delete download</string>
     <string name="downloads_progress">Downloading %1$d/%2$d</string>
     <string name="downloads_queued">Queued</string>
@@ -50,6 +49,16 @@
     <string name="downloads_summary">%1$d tracks - %2$s</string>
     <string name="common_delete">Delete</string>
     <string name="common_cancel">Cancel</string>
+
+    <!-- Radio -->
+    <string name="radio_title">Radio</string>
+    <string name="radio_search_hint">Search stations...</string>
+    <string name="radio_loading">Loading radio...</string>
+    <string name="radio_searching">Searching...</string>
+    <string name="radio_tuning">Tuning station...</string>
+    <string name="radio_unavailable">Station unavailable. Try another.</string>
+    <string name="radio_no_results">No stations found.</string>
+    <string name="radio_powered_by">Powered by TuneIn</string>
 
     <!-- Errors -->
     <string name="common_error_enter_username">Enter username</string>

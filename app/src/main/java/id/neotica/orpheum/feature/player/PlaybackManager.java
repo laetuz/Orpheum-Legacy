@@ -70,6 +70,9 @@ public class PlaybackManager {
             source = null;
         }
         if (TextUtils.isEmpty(source)) {
+            source = track.streamUrl;
+        }
+        if (TextUtils.isEmpty(source)) {
             source = DownloadStore.findTrackFile(track.id);
         }
         if (TextUtils.isEmpty(source)) {
