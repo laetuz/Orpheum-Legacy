@@ -20,8 +20,8 @@ import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
@@ -31,6 +31,7 @@ import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.player.contract.PlayerView;
 import id.neotica.orpheum.feature.player.presenter.PlayerPresenter;
 import id.neotica.orpheum.model.Track;
+import id.neotica.orpheum.ui.components.CircularBitmapDisplayer;
 import id.neotica.orpheum.utils.CrashCatcher;
 import id.neotica.orpheum.utils.ImageUrlHelper;
 import id.neotica.orpheum.utils.TimeFormatHelper;
@@ -42,7 +43,7 @@ public class PlayerActivity extends Activity implements PlayerView {
     private static final String KEY_INDEX = "index";
 
     private static final long SPIN_TICK_MS = 40L;
-    private static final float DEGREES_PER_MS = 360f / 15000f;
+    private static final float DEGREES_PER_MS = 360f / 12000f;
 
     private TextView tvTitle;
     private TextView tvArtist;
@@ -106,7 +107,7 @@ public class PlayerActivity extends Activity implements PlayerView {
 
         coverSizePx = getResources().getDimensionPixelSize(R.dimen.player_cover_size);
         coverOptions = new DisplayImageOptions.Builder()
-                .displayer(new RoundedBitmapDisplayer(coverSizePx / 2))
+                .displayer(new CircularBitmapDisplayer())
                 .cacheInMemory(true)
                 .build();
 
@@ -210,6 +211,12 @@ public class PlayerActivity extends Activity implements PlayerView {
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                         applyCoverRotation();
+                    }
+
+                    @Override
+                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                        coverAvailable = false;
+                        stopSpin();
                     }
                 },
                 null);
