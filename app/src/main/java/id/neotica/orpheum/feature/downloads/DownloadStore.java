@@ -91,6 +91,25 @@ public class DownloadStore {
         }
     }
 
+    public static int getCompletedCount() {
+        synchronized (LOCK) {
+            List<DownloadedAlbum> all = loadAllLocked();
+            int count = 0;
+            for (int i = 0; i < all.size(); i++) {
+                if (STATUS_COMPLETED.equals(all.get(i).status)) {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+
+    public static long getStorageBytes() {
+        synchronized (LOCK) {
+            return sizeOf(getDownloadRoot());
+        }
+    }
+
     public static DownloadedAlbum getAlbum(String albumId) {
         synchronized (LOCK) {
             List<DownloadedAlbum> all = loadAllLocked();
@@ -446,6 +465,23 @@ public class DownloadStore {
         }
         return new Track(source.id, source.albumId, source.title, source.durationSeconds,
                 source.fileUrl, source.trackNumber, source.artistName, source.albumCover);
+    }
+
+    private static long sizeOf(File file) {
+        if (file == null || !file.exists()) {
+            return 0;
+        }
+        if (file.isFile()) {
+            return file.length();
+        }
+        long total = 0;
+        File[] children = file.listFiles();
+        if (children != null) {
+            for (int i = 0; i < children.length; i++) {
+                total += sizeOf(children[i]);
+            }
+        }
+        return total;
     }
 
     private static void deleteRecursive(File file) {

@@ -8,6 +8,10 @@ public interface SettingsView {
 
     void renderProfile(String username);
 
+    void renderVersion(String versionName, int versionCode);
+
+    void renderDownloadsSummary(int albumCount, long totalBytes);
+
     void showMessage(String message);
 
     void navigateToMain();

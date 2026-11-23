@@ -18,6 +18,7 @@ import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.downloads.DownloadStore;
 import id.neotica.orpheum.feature.downloads.domain.DownloadedAlbum;
 import id.neotica.orpheum.utils.ImageUrlHelper;
+import id.neotica.orpheum.utils.SizeFormatHelper;
 
 public class DownloadsAdapter extends ArrayAdapter<DownloadedAlbum> {
 
@@ -72,7 +73,7 @@ public class DownloadsAdapter extends ArrayAdapter<DownloadedAlbum> {
         Context context = getContext();
         if (DownloadStore.STATUS_COMPLETED.equals(album.status)) {
             return context.getString(R.string.downloads_summary,
-                    album.tracks.size(), formatSize(album.totalBytes));
+                    album.tracks.size(), SizeFormatHelper.format(album.totalBytes));
         }
         if (DownloadStore.STATUS_DOWNLOADING.equals(album.status)) {
             return context.getString(R.string.downloads_progress, album.done, album.total);
@@ -81,17 +82,5 @@ public class DownloadsAdapter extends ArrayAdapter<DownloadedAlbum> {
             return context.getString(R.string.downloads_queued);
         }
         return context.getString(R.string.downloads_failed);
-    }
-
-    private static String formatSize(long bytes) {
-        if (bytes <= 0) {
-            return "0 KB";
-        }
-        long kb = Math.round(bytes / 1024.0);
-        if (kb < 1024) {
-            return kb + " KB";
-        }
-        long tenths = Math.round(bytes / (1024.0 * 1024.0) * 10);
-        return (tenths / 10) + "." + (tenths % 10) + " MB";
     }
 }

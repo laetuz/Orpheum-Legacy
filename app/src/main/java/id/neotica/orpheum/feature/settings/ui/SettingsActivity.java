@@ -13,11 +13,14 @@ import id.neotica.orpheum.feature.home.ui.MainActivity;
 import id.neotica.orpheum.feature.settings.contract.SettingsView;
 import id.neotica.orpheum.feature.settings.presenter.SettingsPresenter;
 import id.neotica.orpheum.utils.CrashCatcher;
+import id.neotica.orpheum.utils.SizeFormatHelper;
 import id.neotica.orpheum.utils.TopBarHelper;
 
 public class SettingsActivity extends Activity implements SettingsView {
 
     private TextView tvUsername;
+    private TextView tvVersion;
+    private TextView tvDownloads;
 
     private SettingsPresenter presenter;
 
@@ -34,7 +37,17 @@ public class SettingsActivity extends Activity implements SettingsView {
         presenter.attach(this);
 
         tvUsername = (TextView) findViewById(R.id.tv_settings_username);
+        tvVersion = (TextView) findViewById(R.id.tv_settings_version);
+        tvDownloads = (TextView) findViewById(R.id.tv_settings_downloads);
+        Button btnClearCache = (Button) findViewById(R.id.btn_clear_cover_cache);
         Button btnLogout = (Button) findViewById(R.id.btn_logout);
+
+        btnClearCache.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.clearCoverCache();
+            }
+        });
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,13 +55,32 @@ public class SettingsActivity extends Activity implements SettingsView {
                 presenter.logout();
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         presenter.load();
     }
 
     @Override
     public void renderProfile(String username) {
         tvUsername.setText(username);
+    }
+
+    @Override
+    public void renderVersion(String versionName, int versionCode) {
+        tvVersion.setText(getString(R.string.settings_version, versionName, versionCode));
+    }
+
+    @Override
+    public void renderDownloadsSummary(int albumCount, long totalBytes) {
+        if (albumCount <= 0) {
+            tvDownloads.setText(R.string.settings_no_downloads);
+        } else {
+            tvDownloads.setText(getString(R.string.settings_downloads_summary,
+                    albumCount, SizeFormatHelper.format(totalBytes)));
+        }
     }
 
     @Override
