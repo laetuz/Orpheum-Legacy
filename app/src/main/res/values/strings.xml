@@ -62,10 +62,11 @@
     <string name="radio_favorites_title">Favorites</string>
     <string name="radio_favorite_added">Added to favorites</string>
     <string name="radio_favorite_removed">Removed from favorites</string>
-    <string name="radio_favorites_empty">No favorite stations yet.</string>
-    <string name="radio_favorite_remove">Remove favorite</string>
-    <string name="radio_favorite_remove_confirm">Remove %1$s from favorites?</string>
-    <string name="common_remove">Remove</string>
+    <string name="radio_favorites_empty">No favorites yet.</string>
+    <string name="radio_shows_filter">Shows</string>
+    <string name="radio_show_favorite_add">Favorite show</string>
+    <string name="radio_show_favorite_remove">Remove favorite</string>
+    <string name="radio_remove_from_favorites">Remove from favorites</string>
 
     <!-- Errors -->
     <string name="common_error_enter_username">Enter username</string>

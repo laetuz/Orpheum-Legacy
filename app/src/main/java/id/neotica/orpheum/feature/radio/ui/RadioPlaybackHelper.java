@@ -21,10 +21,11 @@ public final class RadioPlaybackHelper {
             return;
         }
 
-        Track track = new Track(station.guideId, "", station.name, 0, "", 0,
+        Track track = new Track(station.guideId, "", station.name, station.durationSeconds, "", 0,
                 !TextUtils.isEmpty(station.description) ? station.description : "",
                 station.imageUrl);
         track.streamUrl = streamUrl;
+        track.live = station.live;
 
         ArrayList<Track> queue = new ArrayList<Track>();
         queue.add(track);

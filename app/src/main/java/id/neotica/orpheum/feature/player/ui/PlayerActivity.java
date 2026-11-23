@@ -1,8 +1,6 @@
 package id.neotica.orpheum.feature.player.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,9 +9,7 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -32,8 +28,11 @@ import java.util.ArrayList;
 import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.player.contract.PlayerView;
 import id.neotica.orpheum.feature.player.presenter.PlayerPresenter;
+import id.neotica.orpheum.feature.radio.FavoriteStationStore;
+import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.model.Track;
 import id.neotica.orpheum.ui.components.CircularBitmapDisplayer;
+import id.neotica.orpheum.ui.components.DarkDialogHelper;
 import id.neotica.orpheum.utils.CrashCatcher;
 import id.neotica.orpheum.utils.ImageUrlHelper;
 import id.neotica.orpheum.utils.TimeFormatHelper;
@@ -53,9 +52,11 @@ public class PlayerActivity extends Activity implements PlayerView {
     private TextView tvTotalTime;
     private SeekBar seekBar;
     private ImageButton btnPlayPause;
+    private ImageButton btnFavoriteStation;
     private ImageView ivCover;
     private View seekRow;
     private boolean isLive;
+    private Track currentTrack;
 
     private int coverSizePx;
     private DisplayImageOptions coverOptions;
@@ -109,6 +110,14 @@ public class PlayerActivity extends Activity implements PlayerView {
         ImageButton btnNext = (ImageButton) findViewById(R.id.btn_next);
         ivCover = (ImageView) findViewById(R.id.iv_player_cover);
         seekRow = findViewById(R.id.player_seek_row);
+        btnFavoriteStation = (ImageButton) findViewById(R.id.btn_favorite_station);
+
+        btnFavoriteStation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleFavorite();
+            }
+        });
 
         coverSizePx = getResources().getDimensionPixelSize(R.dimen.player_cover_size);
         coverOptions = new DisplayImageOptions.Builder()
@@ -180,6 +189,7 @@ public class PlayerActivity extends Activity implements PlayerView {
         if (presenter != null) {
             presenter.refresh();
         }
+        updateFavoriteIcon();
     }
 
     @Override
@@ -190,7 +200,8 @@ public class PlayerActivity extends Activity implements PlayerView {
 
     @Override
     public void renderTrack(Track track) {
-        isLive = !TextUtils.isEmpty(track.streamUrl);
+        currentTrack = track;
+        isLive = track.live;
         seekRow.setVisibility(isLive ? View.GONE : View.VISIBLE);
 
         tvTitle.setText(track.title);
@@ -207,6 +218,7 @@ public class PlayerActivity extends Activity implements PlayerView {
             coverAngle = 0f;
             coverMatrix.reset();
             ivCover.setImageMatrix(coverMatrix);
+            updateFavoriteIcon();
             return;
         }
 
@@ -228,6 +240,8 @@ public class PlayerActivity extends Activity implements PlayerView {
                     }
                 },
                 null);
+
+        updateFavoriteIcon();
     }
 
     @Override
@@ -289,6 +303,36 @@ public class PlayerActivity extends Activity implements PlayerView {
         ivCover.setImageMatrix(coverMatrix);
     }
 
+    private boolean isFavoritable(Track track) {
+        return track != null && track.live && !TextUtils.isEmpty(track.streamUrl);
+    }
+
+    private void toggleFavorite() {
+        if (!isFavoritable(currentTrack)) {
+            return;
+        }
+        RadioItem item = RadioItem.station(currentTrack.id, currentTrack.title,
+                currentTrack.artistName, currentTrack.albumCover);
+        boolean favorite = FavoriteStationStore.toggle(item);
+        updateFavoriteIcon();
+        Toast.makeText(this,
+                favorite ? R.string.radio_favorite_added : R.string.radio_favorite_removed,
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateFavoriteIcon() {
+        if (btnFavoriteStation == null) {
+            return;
+        }
+        boolean canFavorite = isFavoritable(currentTrack);
+        btnFavoriteStation.setVisibility(canFavorite ? View.VISIBLE : View.GONE);
+        if (canFavorite) {
+            btnFavoriteStation.setImageResource(FavoriteStationStore.isFavorite(currentTrack.id)
+                    ? android.R.drawable.btn_star_big_on
+                    : android.R.drawable.btn_star_big_off);
+        }
+    }
+
     private void showQueue() {
         ArrayList<Track> queue = presenter.getQueue();
         if (queue.isEmpty()) {
@@ -306,18 +350,13 @@ public class PlayerActivity extends Activity implements PlayerView {
             labels[i] = label;
         }
 
-        Context dialogContext = new ContextThemeWrapper(this, R.style.AppDialogTheme);
-        new AlertDialog.Builder(dialogContext)
-                .setTitle(R.string.player_queue)
-                .setAdapter(
-                        new ArrayAdapter<String>(dialogContext, android.R.layout.simple_list_item_1, labels),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                presenter.playAt(which);
-                            }
-                        })
-                .show();
+        DarkDialogHelper.showList(this, getString(R.string.player_queue), labels,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        presenter.playAt(which);
+                    }
+                });
     }
 
     public static Intent createIntent(Activity from, ArrayList<Track> tracks, int index) {

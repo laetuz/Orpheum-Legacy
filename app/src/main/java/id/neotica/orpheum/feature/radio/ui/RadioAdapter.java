@@ -1,7 +1,6 @@
 package id.neotica.orpheum.feature.radio.ui;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,8 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import android.text.TextUtils;
+
 import java.util.List;
 
 import id.neotica.orpheum.R;
@@ -19,6 +20,9 @@ import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.utils.ImageUrlHelper;
 
 public class RadioAdapter extends ArrayAdapter<RadioItem> {
+
+    private static final int TYPE_ROW = 0;
+    private static final int TYPE_HEADER = 1;
 
     public RadioAdapter(Context context, List<RadioItem> items) {
         super(context, 0, items);
@@ -32,8 +36,29 @@ public class RadioAdapter extends ArrayAdapter<RadioItem> {
     }
 
     @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        RadioItem item = getItem(position);
+        return item != null && item.type == RadioItem.TYPE_HEADER ? TYPE_HEADER : TYPE_ROW;
+    }
+
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         RadioItem item = getItem(position);
+
+        if (item != null && item.type == RadioItem.TYPE_HEADER) {
+            TextView header = (TextView) convertView;
+            if (header == null) {
+                header = (TextView) LayoutInflater.from(getContext())
+                        .inflate(R.layout.item_radio_header, parent, false);
+            }
+            header.setText(item.name);
+            return header;
+        }
 
         ViewHolder vh;
         if (convertView == null) {
@@ -52,8 +77,9 @@ public class RadioAdapter extends ArrayAdapter<RadioItem> {
             vh.tvName.setText(item.name);
             vh.tvDescription.setText(!TextUtils.isEmpty(item.description) ? item.description : "");
 
-            boolean favorite = item.type == RadioItem.TYPE_STATION
-                    && FavoriteStationStore.isFavorite(item.guideId);
+            boolean favoritable = (item.type == RadioItem.TYPE_STATION && item.live)
+                    || item.type == RadioItem.TYPE_SHOW;
+            boolean favorite = favoritable && FavoriteStationStore.isFavorite(item.guideId);
             vh.ivFavorite.setVisibility(favorite ? View.VISIBLE : View.GONE);
 
             if (!TextUtils.isEmpty(item.imageUrl)) {

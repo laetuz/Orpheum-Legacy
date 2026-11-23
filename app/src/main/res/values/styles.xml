@@ -2,8 +2,4 @@
 
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar" />
 
-    <style name="AppDialogTheme" parent="@android:style/Theme.Dialog">
-        <item name="android:textColorPrimary">#FFFFFFFF</item>
-    </style>
-
 </resources>

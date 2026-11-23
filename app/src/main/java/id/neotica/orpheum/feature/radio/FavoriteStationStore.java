@@ -16,8 +16,8 @@ import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.utils.JsonHelper;
 
 /**
- * Local favorite-station index (SharedPreferences JSON). Stations are stored by
- * guide id and re-tuned when played, since TuneIn stream URLs rotate.
+ * Local favorite index for live stations and shows (SharedPreferences JSON).
+ * Stations are re-tuned by guide id when played, since TuneIn stream URLs rotate.
  */
 public class FavoriteStationStore {
 
@@ -42,11 +42,15 @@ public class FavoriteStationStore {
                 if (guideId.length() == 0) {
                     continue;
                 }
-                result.add(RadioItem.station(
-                        guideId,
-                        JsonHelper.getString(obj, "name"),
-                        JsonHelper.getString(obj, "description"),
-                        JsonHelper.getString(obj, "image_url")));
+                String name = JsonHelper.getString(obj, "name");
+                String description = JsonHelper.getString(obj, "description");
+                String imageUrl = JsonHelper.getString(obj, "image_url");
+                if ("show".equals(JsonHelper.getString(obj, "type"))) {
+                    result.add(RadioItem.show(guideId, name, description, imageUrl,
+                            JsonHelper.getString(obj, "page_url")));
+                } else {
+                    result.add(RadioItem.station(guideId, name, description, imageUrl));
+                }
             }
             return result;
         }
@@ -63,12 +67,18 @@ public class FavoriteStationStore {
     }
 
     /**
-     * Adds or removes the station. Returns true when it is now a favorite.
+     * Adds or removes a live station or show. Returns true when it is now a favorite.
      */
     public static boolean toggle(RadioItem item) {
         if (item == null || item.guideId == null || item.guideId.length() == 0) {
             return false;
         }
+        boolean favoritable = (item.type == RadioItem.TYPE_STATION && item.live)
+                || item.type == RadioItem.TYPE_SHOW;
+        if (!favoritable) {
+            return false;
+        }
+
         synchronized (LOCK) {
             JSONArray array = loadArray();
             int index = indexOf(array, item.guideId);
@@ -103,10 +113,6 @@ public class FavoriteStationStore {
         }
     }
 
-    private static boolean exists(JSONArray array, String guideId) {
-        return indexOf(array, guideId) >= 0;
-    }
-
     private static int indexOf(JSONArray array, String guideId) {
         for (int i = 0; i < array.length(); i++) {
             JSONObject obj = array.optJSONObject(i);
@@ -133,10 +139,12 @@ public class FavoriteStationStore {
     private static JSONObject itemToJson(RadioItem item) {
         JSONObject obj = new JSONObject();
         try {
+            obj.put("type", item.type == RadioItem.TYPE_SHOW ? "show" : "station");
             obj.put("guide_id", item.guideId);
             obj.put("name", item.name != null ? item.name : "");
             obj.put("description", item.description != null ? item.description : "");
             obj.put("image_url", item.imageUrl != null ? item.imageUrl : "");
+            obj.put("page_url", item.pageUrl != null ? item.pageUrl : "");
             obj.put("added_at", System.currentTimeMillis());
         } catch (Throwable t) {
             // Keep whatever was written

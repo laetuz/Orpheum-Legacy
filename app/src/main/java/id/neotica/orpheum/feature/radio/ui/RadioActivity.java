@@ -2,6 +2,7 @@ package id.neotica.orpheum.feature.radio.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,6 +12,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,6 +26,7 @@ import id.neotica.orpheum.feature.radio.FavoriteStationStore;
 import id.neotica.orpheum.feature.radio.contract.RadioView;
 import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.feature.radio.presenter.RadioPresenter;
+import id.neotica.orpheum.ui.components.DarkDialogHelper;
 import id.neotica.orpheum.ui.components.NowPlayingBarHelper;
 import id.neotica.orpheum.utils.Constants;
 import id.neotica.orpheum.utils.CrashCatcher;
@@ -33,10 +36,14 @@ public class RadioActivity extends Activity implements RadioView {
 
     public static final String EXTRA_PAGE_URL = "radio_page_url";
     public static final String EXTRA_TITLE = "radio_page_title";
+    public static final String EXTRA_SHOW_ITEM = "radio_show_item";
 
     private EditText etSearch;
+    private CheckBox cbShows;
+    private Button btnShowFavorite;
     private RadioAdapter adapter;
     private RadioPresenter presenter;
+    private RadioItem showItem;
     private String pageUrl;
 
     @Override
@@ -60,12 +67,34 @@ public class RadioActivity extends Activity implements RadioView {
                     }
                 });
 
+        Object showExtra = intent != null ? intent.getSerializableExtra(EXTRA_SHOW_ITEM) : null;
+        if (showExtra instanceof RadioItem) {
+            RadioItem candidate = (RadioItem) showExtra;
+            if (candidate.type == RadioItem.TYPE_SHOW) {
+                showItem = candidate;
+            }
+        }
+
         presenter = new RadioPresenter(this);
         presenter.attach(this);
 
         etSearch = (EditText) findViewById(R.id.et_radio_search);
+        cbShows = (CheckBox) findViewById(R.id.cb_radio_shows);
         Button btnSearch = (Button) findViewById(R.id.btn_radio_search);
+        btnShowFavorite = (Button) findViewById(R.id.btn_show_favorite);
         ListView listView = (ListView) findViewById(R.id.lv_radio);
+
+        if (showItem != null) {
+            btnShowFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    toggleShowFavorite();
+                }
+            });
+            updateShowFavoriteButton();
+        } else {
+            btnShowFavorite.setVisibility(View.GONE);
+        }
 
         adapter = new RadioAdapter(this, new ArrayList<RadioItem>());
         listView.setAdapter(adapter);
@@ -92,10 +121,10 @@ public class RadioActivity extends Activity implements RadioView {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RadioItem item = adapter.getItem(position);
-                if (item == null) {
+                if (item == null || item.type == RadioItem.TYPE_HEADER) {
                     return;
                 }
-                if (item.type == RadioItem.TYPE_LINK) {
+                if (item.type == RadioItem.TYPE_LINK || item.type == RadioItem.TYPE_SHOW) {
                     openLink(item);
                 } else {
                     presenter.tune(item);
@@ -107,14 +136,11 @@ public class RadioActivity extends Activity implements RadioView {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 RadioItem item = adapter.getItem(position);
-                if (item == null || item.type != RadioItem.TYPE_STATION) {
+                if (item == null || !isFavoritable(item)
+                        || !FavoriteStationStore.isFavorite(item.guideId)) {
                     return false;
                 }
-                boolean favorite = FavoriteStationStore.toggle(item);
-                Toast.makeText(RadioActivity.this,
-                        favorite ? R.string.radio_favorite_added : R.string.radio_favorite_removed,
-                        Toast.LENGTH_SHORT).show();
-                adapter.notifyDataSetChanged();
+                showRemoveMenu(item);
                 return true;
             }
         });
@@ -130,6 +156,7 @@ public class RadioActivity extends Activity implements RadioView {
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
+        updateShowFavoriteButton();
         NowPlayingBarHelper.refresh(this);
     }
 
@@ -142,14 +169,66 @@ public class RadioActivity extends Activity implements RadioView {
             Toast.makeText(this, R.string.radio_no_results, Toast.LENGTH_SHORT).show();
             return;
         }
-        presenter.search(query);
+        presenter.search(query, cbShows != null && cbShows.isChecked());
     }
 
     private void openLink(RadioItem item) {
         Intent intent = new Intent(this, RadioActivity.class);
         intent.putExtra(EXTRA_PAGE_URL, item.pageUrl);
         intent.putExtra(EXTRA_TITLE, item.name);
+        if (item.type == RadioItem.TYPE_SHOW) {
+            intent.putExtra(EXTRA_SHOW_ITEM, item);
+        }
         startActivity(intent);
+    }
+
+    private boolean isFavoritable(RadioItem item) {
+        return (item.type == RadioItem.TYPE_STATION && item.live)
+                || item.type == RadioItem.TYPE_SHOW;
+    }
+
+    private void toggleShowFavorite() {
+        if (showItem == null) {
+            return;
+        }
+        boolean favorite = FavoriteStationStore.toggle(showItem);
+        updateShowFavoriteButton();
+        adapter.notifyDataSetChanged();
+        Toast.makeText(this,
+                favorite ? R.string.radio_favorite_added : R.string.radio_favorite_removed,
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void updateShowFavoriteButton() {
+        if (btnShowFavorite == null) {
+            return;
+        }
+        if (showItem == null) {
+            btnShowFavorite.setVisibility(View.GONE);
+            return;
+        }
+        btnShowFavorite.setVisibility(View.VISIBLE);
+        btnShowFavorite.setText(FavoriteStationStore.isFavorite(showItem.guideId)
+                ? R.string.radio_show_favorite_remove
+                : R.string.radio_show_favorite_add);
+    }
+
+    private void showRemoveMenu(final RadioItem item) {
+        DarkDialogHelper.showList(this, item.name,
+                new String[] { getString(R.string.radio_remove_from_favorites) },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        FavoriteStationStore.remove(item.guideId);
+                        adapter.notifyDataSetChanged();
+                        if (showItem != null && showItem.guideId != null
+                                && showItem.guideId.equals(item.guideId)) {
+                            updateShowFavoriteButton();
+                        }
+                        Toast.makeText(RadioActivity.this, R.string.radio_favorite_removed,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override

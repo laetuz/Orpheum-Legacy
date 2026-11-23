@@ -61,14 +61,15 @@ public class RadioPresenter {
         });
     }
 
-    public void search(String query) {
+    public void search(String query, boolean showsOnly) {
         String encoded;
         try {
             encoded = URLEncoder.encode(query == null ? "" : query.trim(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             encoded = query;
         }
-        String url = Constants.TUNEIN_SEARCH_URL + "?query=" + encoded + "&filter=s&render=json";
+        String filter = showsOnly ? "p" : "s";
+        String url = Constants.TUNEIN_SEARCH_URL + "?query=" + encoded + "&filter=" + filter + "&render=json";
         requestJson(url, context.getString(R.string.radio_searching), new ApiCallback() {
             @Override
             public void onSuccess(String response) {
@@ -181,23 +182,126 @@ public class RadioPresenter {
             String type = JsonHelper.getString(obj, "type");
             String text = JsonHelper.getString(obj, "text");
             String url = JsonHelper.getString(obj, "URL");
+            String subtext = JsonHelper.getString(obj, "subtext");
+            String image = JsonHelper.getString(obj, "image");
             JSONArray children = obj.optJSONArray("children");
 
             if ("audio".equals(type)) {
                 String guideId = JsonHelper.getString(obj, "guide_id");
-                if (guideId.length() > 0 && text.length() > 0) {
-                    out.add(RadioItem.station(guideId, text,
-                            JsonHelper.getString(obj, "subtext"),
-                            JsonHelper.getString(obj, "image")));
+                if (guideId.length() == 0 || text.length() == 0) {
+                    continue;
+                }
+                String item = JsonHelper.getString(obj, "item");
+                boolean live = "station".equals(item)
+                        || (item.length() == 0 && guideId.startsWith("s"));
+                if (live) {
+                    out.add(RadioItem.station(guideId, text, subtext, image));
+                } else {
+                    TitleInfo info = parseTitle(text);
+                    String description = subtext;
+                    if (info.seconds > 0) {
+                        String label = formatDurationLabel(info.seconds);
+                        description = description.length() > 0 ? label + " - " + description : label;
+                    }
+                    out.add(RadioItem.episode(guideId, info.title, description, image, info.seconds));
                 }
             } else if (children != null) {
+                if (text.length() > 0) {
+                    int last = out.size() - 1;
+                    boolean duplicate = last >= 0
+                            && out.get(last).type == RadioItem.TYPE_HEADER
+                            && text.equals(out.get(last).name);
+                    if (!duplicate) {
+                        out.add(RadioItem.header(text));
+                    }
+                }
                 collect(children, out);
             } else if ("link".equals(type) && url.length() > 0) {
-                if (text.length() > 0) {
+                if ("show".equals(JsonHelper.getString(obj, "item"))) {
+                    String guideId = JsonHelper.getString(obj, "guide_id");
+                    if (guideId.length() > 0 && text.length() > 0) {
+                        out.add(RadioItem.show(guideId, text, subtext, image, url));
+                    }
+                } else if (text.length() > 0) {
                     out.add(RadioItem.link(text, url));
                 }
             }
         }
+    }
+
+    private static class TitleInfo {
+        String title = "";
+        int seconds;
+    }
+
+    private TitleInfo parseTitle(String raw) {
+        TitleInfo info = new TitleInfo();
+        info.title = raw != null ? raw.trim() : "";
+        if (info.title.length() == 0 || !info.title.endsWith(")")) {
+            return info;
+        }
+        int open = info.title.lastIndexOf('(');
+        if (open < 0) {
+            return info;
+        }
+        String inside = info.title.substring(open + 1, info.title.length() - 1)
+                .trim().toLowerCase();
+        if (inside.length() == 0) {
+            return info;
+        }
+
+        int hours = 0;
+        int minutes = 0;
+        boolean matched = false;
+        int index = 0;
+        while (index < inside.length()) {
+            while (index < inside.length() && inside.charAt(index) == ' ') {
+                index++;
+            }
+            int start = index;
+            while (index < inside.length() && Character.isDigit(inside.charAt(index))) {
+                index++;
+            }
+            if (start == index) {
+                return info;
+            }
+            int value;
+            try {
+                value = Integer.parseInt(inside.substring(start, index));
+            } catch (Throwable t) {
+                return info;
+            }
+            if (index < inside.length() && inside.charAt(index) == 'h') {
+                hours = value;
+                index++;
+                matched = true;
+            } else if (index < inside.length() && inside.charAt(index) == 'm') {
+                minutes = value;
+                index++;
+                matched = true;
+            } else {
+                return info;
+            }
+            while (index < inside.length() && inside.charAt(index) == ' ') {
+                index++;
+            }
+        }
+        if (!matched || (hours == 0 && minutes == 0)) {
+            return info;
+        }
+        info.seconds = hours * 3600 + minutes * 60;
+        info.title = info.title.substring(0, open).trim();
+        return info;
+    }
+
+    private static String formatDurationLabel(int seconds) {
+        int totalMinutes = seconds / 60;
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+        if (hours > 0) {
+            return minutes > 0 ? hours + "h " + minutes + "m" : hours + "h";
+        }
+        return minutes + "m";
     }
 
     private StreamCandidate pickStream(JSONObject root) {

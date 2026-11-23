@@ -11,7 +11,7 @@ Built for vintage Android hardware locked out of modern streaming apps and TLS/S
 - **Streaming playback** — queue playback with auto-advance, queue dialog, seek bar, previous/next, spinning circular album art, and a persistent Now Playing bar
 - **Background audio service** — foreground `AudioService` with an ongoing notification (Play/Pause & Next controls on API 16+, reflection-based foreground fallback down to API 3)
 - **Offline mode** — download albums (tracks + cover) via foreground `DownloadService` to `<external>/Orpheum/downloads/` (with internal storage fallback), automatic offline playback, and a Downloads screen accessible from Home
-- **Internet radio** — browse and search TuneIn stations (via `opml.radiotime.com`) with M3U/PLS playlist resolution, live stream playback in the same player, and local favorite stations
+- **Internet radio** — browse and search TuneIn stations and shows (via `opml.radiotime.com`) with M3U/PLS playlist resolution, live station and on-demand episode playback in the same player, and local favorite stations/shows
 - **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and profile/logout
 - **Trackball / D-pad navigation** — focusable rows with an orange selection highlight
 - **Cover caching** — memory and disk caching via Universal Image Loader

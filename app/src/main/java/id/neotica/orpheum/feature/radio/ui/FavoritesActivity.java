@@ -1,11 +1,9 @@
 package id.neotica.orpheum.feature.radio.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -19,6 +17,7 @@ import id.neotica.orpheum.feature.radio.FavoriteStationStore;
 import id.neotica.orpheum.feature.radio.contract.RadioView;
 import id.neotica.orpheum.feature.radio.domain.RadioItem;
 import id.neotica.orpheum.feature.radio.presenter.RadioPresenter;
+import id.neotica.orpheum.ui.components.DarkDialogHelper;
 import id.neotica.orpheum.ui.components.NowPlayingBarHelper;
 import id.neotica.orpheum.utils.CrashCatcher;
 import id.neotica.orpheum.utils.TopBarHelper;
@@ -53,7 +52,12 @@ public class FavoritesActivity extends Activity implements RadioView {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RadioItem item = adapter.getItem(position);
-                if (item != null) {
+                if (item == null) {
+                    return;
+                }
+                if (item.type == RadioItem.TYPE_SHOW) {
+                    openShow(item);
+                } else {
                     presenter.tune(item);
                 }
             }
@@ -64,7 +68,7 @@ public class FavoritesActivity extends Activity implements RadioView {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 RadioItem item = adapter.getItem(position);
                 if (item != null) {
-                    confirmRemove(item);
+                    showRemoveMenu(item);
                     return true;
                 }
                 return false;
@@ -94,25 +98,30 @@ public class FavoritesActivity extends Activity implements RadioView {
         listView.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
-    private void confirmRemove(final RadioItem item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new ContextThemeWrapper(this, R.style.AppDialogTheme));
-        builder.setTitle(R.string.radio_favorite_remove);
-        builder.setMessage(getString(R.string.radio_favorite_remove_confirm, item.name));
-        builder.setPositiveButton(R.string.common_remove, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                FavoriteStationStore.remove(item.guideId);
-                reload();
-            }
-        });
-        builder.setNegativeButton(R.string.common_cancel, null);
-        builder.show();
+    private void openShow(RadioItem item) {
+        Intent intent = new Intent(this, RadioActivity.class);
+        intent.putExtra(RadioActivity.EXTRA_PAGE_URL, item.pageUrl);
+        intent.putExtra(RadioActivity.EXTRA_TITLE, item.name);
+        intent.putExtra(RadioActivity.EXTRA_SHOW_ITEM, item);
+        startActivity(intent);
+    }
+
+    private void showRemoveMenu(final RadioItem item) {
+        DarkDialogHelper.showList(this, item.name,
+                new String[] { getString(R.string.radio_remove_from_favorites) },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        FavoriteStationStore.remove(item.guideId);
+                        reload();
+                        Toast.makeText(FavoritesActivity.this, R.string.radio_favorite_removed,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
     public void renderItems(List<RadioItem> items) {
-        // Favorites are loaded from the local store, not the TuneIn API.
     }
 
     @Override

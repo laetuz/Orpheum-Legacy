@@ -20,6 +20,7 @@ public class Track implements Serializable {
     public String albumCover;
     public String localPath;
     public String streamUrl;
+    public boolean live;
 
     public Track(String id, String albumId, String title, int durationSeconds, String fileUrl, int trackNumber, String artistName, String albumCover) {
         this.id = id;
