@@ -25,11 +25,7 @@ Download the latest APK from [GitHub Releases](https://github.com/laetuz/Orpheum
 
 ## Architecture
 
-Built with the same feature-first MVP architecture as [HoloMarket](https://github.com/laetuz/HoloMarket), backed by [orpheum-api](https://github.com/laetuz/orpheum-api):
-
-- `feature/<name>/{contract,presenter,ui}` — Activities implement a View contract; Presenters own state, networking, and JSON parsing
-- Plain `AsyncTask` + `HttpURLConnection`, `ListView` + `ArrayAdapter`, and `SdkCompat` for API-1-safe version checks — no Support Library / AppCompat dependencies
-- Universal Image Loader `1.9.5` for album and track artwork
+Built with the same feature-first MVP architecture as [HoloMarket](https://github.com/laetuz/HoloMarket) (see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)), backed by [orpheum-api](https://github.com/laetuz/orpheum-api) — plain `AsyncTask` + `HttpURLConnection`, `ListView` + `ArrayAdapter`, `SdkCompat`, and Universal Image Loader `1.9.5` with no Support Library / AppCompat dependencies.
 
 ## Prerequisites
 
@@ -76,3 +72,10 @@ Release flow:
 2. Commit and push to `main`.
 3. `git tag vX.Y.Z && git push origin vX.Y.Z`.
 4. The workflow builds `Orpheum-vX.Y.Z.apk` and attaches it to the GitHub Release.
+
+## License
+
+- **Code** — GNU General Public License v3.0 (see [`LICENSE`](LICENSE)).
+- **Documentation** (`docs/`) — MIT License (see [`docs/LICENSE`](docs/LICENSE)), so the architecture guide stays reusable.
+- **Third-party components** — see [`THIRD_PARTY_NOTICES`](THIRD_PARTY_NOTICES).
+- **Brand** — "Orpheum" / "Neotica.id" names and logos are trademarks of Neotica.id; see [`TRADEMARKS.md`](TRADEMARKS.md).
