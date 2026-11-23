@@ -212,7 +212,11 @@ public class DownloadService extends Service {
 
             File target = DownloadStore.getTrackFile(album.id, track.id);
             try {
-                downloadFile(Constants.ORPHEUM_BASE + "/stream/" + track.id, target, album.id);
+                String source = track.streamUrl;
+                if (TextUtils.isEmpty(source)) {
+                    source = Constants.ORPHEUM_BASE + "/stream/" + track.id;
+                }
+                downloadFile(source, target, album.id);
             } catch (IOException e) {
                 DownloadStore.markFailed(album.id);
                 sendState(album.id, DownloadStore.STATUS_FAILED, done, total);

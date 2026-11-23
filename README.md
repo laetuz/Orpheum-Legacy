@@ -2,7 +2,7 @@
 
 Legacy Android music streaming client with `minSdkVersion 3` (**Android 1.5+ / API 3, Cupcake**) — practically exercised on Eclair / Froyo / Gingerbread.
 
-Built for vintage Android hardware locked out of modern streaming apps and TLS/SSL requirements, Orpheum speaks plain HTTP/JSON and plays catalog streams, offline downloads, and live internet radio through Android's built-in `MediaPlayer` as part of the Neotica retro ecosystem.
+Built for vintage Android hardware locked out of modern streaming apps and TLS/SSL requirements, Orpheum speaks plain HTTP/JSON and plays catalog streams, offline downloads, self-hosted Subsonic libraries, and live internet radio through Android's built-in `MediaPlayer` as part of the Neotica retro ecosystem.
 
 ## Features
 
@@ -12,7 +12,8 @@ Built for vintage Android hardware locked out of modern streaming apps and TLS/S
 - **Background audio service** — foreground `AudioService` with an ongoing notification (Play/Pause & Next controls on API 16+, reflection-based foreground fallback down to API 3)
 - **Offline mode** — download albums (tracks + cover) via foreground `DownloadService` to `<external>/Orpheum/downloads/` (with internal storage fallback), automatic offline playback, and a Downloads screen accessible from Home
 - **Internet radio** — browse and search TuneIn stations and shows (via `opml.radiotime.com`) with M3U/PLS playlist resolution, live station and on-demand episode playback in the same player, and local favorite stations/shows
-- **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and a Settings screen with profile, app version, downloaded-storage summary, cover-cache clearing, and logout
+- **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and a Settings screen with profile, active music source, app version, downloaded-storage summary, cover-cache clearing, and logout
+- **Subsonic / OpenSubsonic** — connect your own Navidrome, LMS, or Supysonic server (HTTP or HTTPS) alongside the Orpheum backend; browse Home/New Releases/Search, open albums, stream MP3-transcoded audio, and download albums for offline playback; switch sources in Settings without losing downloads
 - **Trackball / D-pad navigation** — focusable rows with an orange selection highlight
 - **Cover caching** — memory and disk caching via Universal Image Loader
 - **CrashCatcher** — saves the last crash stacktrace and shows it on next launch
@@ -25,7 +26,7 @@ Download the latest APK from [GitHub Releases](https://github.com/laetuz/Orpheum
 
 ## Architecture
 
-Built with the same feature-first MVP architecture as [HoloMarket](https://github.com/laetuz/HoloMarket) (see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)), backed by [orpheum-api](https://github.com/laetuz/orpheum-api) — plain `AsyncTask` + `HttpURLConnection`, `ListView` + `ArrayAdapter`, `SdkCompat`, and Universal Image Loader `1.9.5` with no Support Library / AppCompat dependencies.
+Built with the same feature-first MVP architecture as [HoloMarket](https://github.com/laetuz/HoloMarket) (see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)), backed by [orpheum-api](https://github.com/laetuz/orpheum-api) — plain `AsyncTask` + `HttpURLConnection`, `ListView` + `ArrayAdapter`, `SdkCompat`, and Universal Image Loader `1.9.5` with no Support Library / AppCompat dependencies. A small `source/` layer selects between the Orpheum API and a user-provided Subsonic server at runtime.
 
 ## Prerequisites
 
@@ -51,6 +52,16 @@ export JAVA_HOME=/path/to/jdk8
 ```
 
 AGP 2.3.2 is resolved from JCenter mirrors (Aliyun + Huawei Cloud) configured in the root `build.gradle` — plain `jcenter()` no longer works.
+
+### Subsonic development server
+
+The Subsonic client needs a server to talk to; no backend or Docker setup is required. A throwaway mock lives in `tools/subsonic-mock/`:
+
+```sh
+python3 tools/subsonic-mock/mock_server.py --port 8080
+```
+
+Point an emulator at `http://10.0.2.2:8080` (any username/password). For a physical device, add `--host 0.0.0.0` and use your Mac's LAN address. It serves canned albums/tracks, generated covers, and a short WAV tone through the same endpoints as a real server. Real users connect Orpheum to their own Navidrome/LMS/Supysonic instance; nothing is proxied through or stored on the Orpheum backend.
 
 ## CI / Releasing
 

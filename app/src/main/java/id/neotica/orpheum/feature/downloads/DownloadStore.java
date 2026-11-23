@@ -74,11 +74,11 @@ public class DownloadStore {
     }
 
     public static File getAlbumDir(String albumId) {
-        return new File(getDownloadRoot(), albumId);
+        return new File(getDownloadRoot(), safeName(albumId));
     }
 
     public static File getTrackFile(String albumId, String trackId) {
-        return new File(getAlbumDir(albumId), trackId + ".mp3");
+        return new File(getAlbumDir(albumId), safeName(trackId) + ".mp3");
     }
 
     public static File getCoverFile(String albumId) {
@@ -257,6 +257,7 @@ public class DownloadStore {
                 Track track = new Track(meta.id, meta.albumId, meta.title, meta.durationSeconds,
                         meta.fileUrl, meta.trackNumber, meta.artistName, coverUri);
                 track.localPath = file.getAbsolutePath();
+                track.streamUrl = meta.streamUrl;
                 result.add(track);
             }
             return result;
@@ -409,6 +410,7 @@ public class DownloadStore {
                 trackObj.put("file_url", track.fileUrl);
                 trackObj.put("track_number", track.trackNumber);
                 trackObj.put("artist_name", track.artistName);
+                trackObj.put("stream_url", track.streamUrl);
                 tracks.put(trackObj);
             }
             obj.put("tracks", tracks);
@@ -445,7 +447,7 @@ public class DownloadStore {
                 if (trackObj == null) {
                     continue;
                 }
-                entry.tracks.add(new Track(
+                Track track = new Track(
                         JsonHelper.getString(trackObj, "id"),
                         JsonHelper.getString(trackObj, "album_id"),
                         JsonHelper.getString(trackObj, "title"),
@@ -453,7 +455,9 @@ public class DownloadStore {
                         JsonHelper.getString(trackObj, "file_url"),
                         JsonHelper.getInt(trackObj, "track_number", 0),
                         JsonHelper.getString(trackObj, "artist_name"),
-                        null));
+                        null);
+                track.streamUrl = JsonHelper.getString(trackObj, "stream_url");
+                entry.tracks.add(track);
             }
         }
         return entry;
@@ -463,8 +467,17 @@ public class DownloadStore {
         if (source == null) {
             return null;
         }
-        return new Track(source.id, source.albumId, source.title, source.durationSeconds,
+        Track track = new Track(source.id, source.albumId, source.title, source.durationSeconds,
                 source.fileUrl, source.trackNumber, source.artistName, source.albumCover);
+        track.streamUrl = source.streamUrl;
+        return track;
+    }
+
+    private static String safeName(String id) {
+        if (id == null || id.length() == 0 || ".".equals(id) || "..".equals(id)) {
+            return "_";
+        }
+        return id.replace('/', '_').replace('\\', '_').replace(':', '_');
     }
 
     private static long sizeOf(File file) {

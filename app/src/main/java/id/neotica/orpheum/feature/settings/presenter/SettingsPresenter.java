@@ -10,23 +10,22 @@ import id.neotica.orpheum.BuildConfig;
 import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.downloads.DownloadStore;
 import id.neotica.orpheum.feature.settings.contract.SettingsView;
-import id.neotica.orpheum.utils.AuthManager;
+import id.neotica.orpheum.source.MusicSource;
+import id.neotica.orpheum.source.SourceManager;
 
 /**
- * MVP presenter owning the settings screen: profile, version, downloaded storage,
- * cover-cache clearing, and logout. Rendering is delegated to a {@link SettingsView}.
+ * MVP presenter owning the settings screen: profile, active source, version,
+ * downloaded storage, cover-cache clearing, and logout.
  */
 public class SettingsPresenter {
 
     private final Context context;
-    private final AuthManager authManager;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private SettingsView view;
 
     public SettingsPresenter(Context context) {
         this.context = context;
-        this.authManager = new AuthManager(context);
     }
 
     public void attach(SettingsView view) {
@@ -38,9 +37,24 @@ public class SettingsPresenter {
     }
 
     public void load() {
-        String username = authManager.getUsernameFromToken();
+        MusicSource source = SourceManager.get(context);
+        boolean subsonic = SourceManager.SOURCE_SUBSONIC.equals(source.getId());
+        String label = context.getString(subsonic
+                ? R.string.settings_source_subsonic
+                : R.string.settings_source_orpheum);
+        String detail;
+        String profile;
+        if (source.isLoggedIn()) {
+            profile = source.getDisplayName();
+            detail = subsonic ? source.getDescription() : profile;
+        } else {
+            profile = context.getString(R.string.settings_source_none);
+            detail = context.getString(R.string.settings_source_none);
+        }
+
         if (view != null) {
-            view.renderProfile(username != null ? username : "User");
+            view.renderProfile(profile);
+            view.renderSource(label, detail, subsonic);
             view.renderVersion(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
         }
         new Thread(new Runnable() {
@@ -58,6 +72,14 @@ public class SettingsPresenter {
                 });
             }
         }).start();
+    }
+
+    public void switchSource(String sourceId) {
+        SourceManager.setActive(context, sourceId);
+        if (view != null) {
+            view.showMessage(context.getString(R.string.settings_source_changed));
+            view.navigateToMain();
+        }
     }
 
     public void clearCoverCache() {
@@ -92,9 +114,13 @@ public class SettingsPresenter {
     }
 
     public void logout() {
-        authManager.clear();
+        boolean subsonic = SourceManager.SOURCE_SUBSONIC.equals(
+                SourceManager.get(context).getId());
+        SourceManager.logout(context);
         if (view != null) {
-            view.showMessage("Logged out");
+            view.showMessage(context.getString(subsonic
+                    ? R.string.subsonic_disconnected
+                    : R.string.settings_logged_out));
             view.navigateToMain();
         }
     }

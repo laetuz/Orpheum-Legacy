@@ -31,6 +31,7 @@ import id.neotica.orpheum.feature.player.ui.PlayerActivity;
 import id.neotica.orpheum.feature.radio.ui.RadioActivity;
 import id.neotica.orpheum.feature.search.ui.SearchActivity;
 import id.neotica.orpheum.feature.settings.ui.SettingsActivity;
+import id.neotica.orpheum.feature.subsonic.ui.SubsonicLoginActivity;
 import id.neotica.orpheum.feature.trackfeed.ui.TrackFeedActivity;
 import id.neotica.orpheum.model.Album;
 import id.neotica.orpheum.model.Track;
@@ -82,6 +83,13 @@ public class MainActivity extends Activity implements HomeView {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MainActivity.this, RegisterActivity.class));
+            }
+        });
+
+        findViewById(R.id.btn_subsonic).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, SubsonicLoginActivity.class));
             }
         });
 

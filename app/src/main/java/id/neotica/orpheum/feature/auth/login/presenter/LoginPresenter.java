@@ -11,6 +11,7 @@ import id.neotica.orpheum.feature.auth.login.contract.LoginView;
 import id.neotica.orpheum.feature.auth.login.domain.LoginResult;
 import id.neotica.orpheum.network.ApiCallback;
 import id.neotica.orpheum.network.ApiTask;
+import id.neotica.orpheum.source.SourceManager;
 import id.neotica.orpheum.utils.AuthManager;
 import id.neotica.orpheum.utils.Constants;
 
@@ -75,6 +76,7 @@ public class LoginPresenter {
                 authManager.saveToken(result.token);
                 authManager.saveRefreshToken(result.refreshToken);
                 authManager.saveExpirationTime(result.expirationTime);
+                SourceManager.setActive(context, SourceManager.SOURCE_ORPHEUM);
 
                 fetchUsername();
             }

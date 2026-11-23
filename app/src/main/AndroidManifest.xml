@@ -20,6 +20,7 @@
         <activity android:name=".feature.auth.login.ui.LoginActivity" />
         <activity android:name=".feature.auth.forgotpassword.ui.ForgotPasswordActivity" />
         <activity android:name=".feature.auth.register.ui.RegisterActivity" />
+        <activity android:name=".feature.subsonic.ui.SubsonicLoginActivity" />
         <activity android:name=".feature.settings.ui.SettingsActivity" />
         <activity android:name=".feature.trackfeed.ui.TrackFeedActivity" />
         <activity android:name=".feature.albumfeed.ui.AlbumFeedActivity" />

@@ -2,24 +2,16 @@ package id.neotica.orpheum.feature.search.presenter;
 
 import android.content.Context;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-
 import id.neotica.orpheum.feature.search.contract.SearchView;
 import id.neotica.orpheum.model.Track;
-import id.neotica.orpheum.network.ApiCallback;
-import id.neotica.orpheum.network.ApiTask;
-import id.neotica.orpheum.utils.Constants;
-import id.neotica.orpheum.utils.JsonHelper;
+import id.neotica.orpheum.source.MusicSource;
+import id.neotica.orpheum.source.SourceCallback;
+import id.neotica.orpheum.source.SourceManager;
+import id.neotica.orpheum.source.domain.Feed;
 
 /**
- * MVP presenter owning track search: query state, paging and parsing.
- * Rendering is delegated to a {@link SearchView}; networking stays here.
+ * MVP presenter owning track search: query state and paging.
+ * Rendering is delegated to a {@link SearchView}; networking stays in the source layer.
  */
 public class SearchPresenter {
 
@@ -28,7 +20,7 @@ public class SearchPresenter {
     private SearchView view;
     private String query = "";
     private int page = 1;
-    private int totalPages = 1;
+    private boolean hasMore;
 
     public SearchPresenter(Context context) {
         this.context = context;
@@ -45,46 +37,27 @@ public class SearchPresenter {
     public void search(String query) {
         this.query = query == null ? "" : query.trim();
         this.page = 1;
-        request(buildUrl(page), false);
+        request(false);
     }
 
     public void loadMore() {
-        if (page >= totalPages) {
+        if (!hasMore) {
             return;
         }
         page++;
-        request(buildUrl(page), true);
+        request(true);
     }
 
-    private void request(String url, final boolean append) {
-        requestSearch(url, new ApiCallback() {
+    private void request(final boolean append) {
+        MusicSource source = SourceManager.get(context);
+        source.search(context, query, page, 20, new SourceCallback<Feed<Track>>() {
             @Override
-            public void onSuccess(String response) {
-                try {
-                    JSONObject root = new JSONObject(response);
-                    page = JsonHelper.getInt(root, "page", page);
-                    totalPages = JsonHelper.getInt(root, "total_pages", 1);
-
-                    List<Track> results = new ArrayList<Track>();
-                    JSONArray data = root.optJSONArray("data");
-                    if (data != null) {
-                        for (int i = 0; i < data.length(); i++) {
-                            Track track = Track.fromJson(data.optJSONObject(i));
-                            if (track != null) {
-                                results.add(track);
-                            }
-                        }
-                    }
-
-                    if (view != null) {
-                        view.renderResults(results, append);
-                        view.showLoadMore(page < totalPages);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    if (view != null) {
-                        view.showError("Error parsing server data.");
-                    }
+            public void onSuccess(Feed<Track> feed) {
+                page = feed.page;
+                hasMore = feed.hasMore;
+                if (view != null) {
+                    view.renderResults(feed.items, append);
+                    view.showLoadMore(hasMore);
                 }
             }
 
@@ -98,21 +71,5 @@ public class SearchPresenter {
                 }
             }
         });
-    }
-
-    private String buildUrl(int page) {
-        String encoded;
-        try {
-            encoded = URLEncoder.encode(query, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            encoded = query;
-        }
-        return Constants.SEARCH_URL + "?q=" + encoded + "&page=" + page + "&limit=20";
-    }
-
-    // --- I/O seam: overridden in tests to run synchronously ---
-
-    void requestSearch(String url, ApiCallback callback) {
-        new ApiTask(context, "GET", url, null, "Searching...", callback).execute();
     }
 }

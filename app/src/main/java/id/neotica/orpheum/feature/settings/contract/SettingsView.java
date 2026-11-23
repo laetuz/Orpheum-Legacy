@@ -8,6 +8,8 @@ public interface SettingsView {
 
     void renderProfile(String username);
 
+    void renderSource(String label, String detail, boolean subsonicActive);
+
     void renderVersion(String versionName, int versionCode);
 
     void renderDownloadsSummary(int albumCount, long totalBytes);

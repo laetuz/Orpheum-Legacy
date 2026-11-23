@@ -22,10 +22,20 @@
 
     <!-- Settings -->
     <string name="settings_section_account">Account</string>
+    <string name="settings_section_source">Music source</string>
     <string name="settings_section_about">About</string>
     <string name="settings_section_storage">Storage</string>
+    <string name="settings_switch_source">Switch source</string>
+    <string name="settings_source_orpheum">Orpheum account</string>
+    <string name="settings_source_subsonic">Subsonic server</string>
+    <string name="settings_source_signin">Sign in to Orpheum</string>
+    <string name="settings_source_connect">Connect Subsonic server</string>
+    <string name="settings_source_changed">Music source changed</string>
+    <string name="settings_source_none">Not signed in</string>
+    <string name="settings_logged_out">Logged out</string>
     <string name="settings_version">Version %1$s (%2$d)</string>
     <string name="settings_downloads_summary">%1$d albums - %2$s</string>
+    <string name="settings_downloads_summary_one">1 album - %1$s</string>
     <string name="settings_no_downloads">No downloaded albums</string>
     <string name="settings_clear_cover_cache">Clear cover cache</string>
     <string name="settings_cover_cache_cleared">Cover cache cleared</string>
@@ -42,6 +52,18 @@
     <string name="common_register">Register</string>
     <string name="common_logout">Logout</string>
     <string name="auth_login_forgot">Forgot Password?</string>
+
+    <!-- Subsonic -->
+    <string name="home_connect_subsonic">Connect Subsonic server</string>
+    <string name="subsonic_title">Subsonic</string>
+    <string name="subsonic_prompt">Connect to your Subsonic server</string>
+    <string name="subsonic_server_hint">Server URL</string>
+    <string name="subsonic_connect">Connect</string>
+    <string name="subsonic_disconnect">Disconnect server</string>
+    <string name="subsonic_credentials_note">Credentials are sent directly to your server and stored only on this device.</string>
+    <string name="subsonic_error_server">Enter server URL</string>
+    <string name="subsonic_error_invalid_server">Invalid server URL</string>
+    <string name="subsonic_disconnected">Disconnected from server</string>
 
     <!-- Home -->
     <string name="home_recent_albums">Recent Albums</string>
