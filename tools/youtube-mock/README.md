@@ -52,7 +52,7 @@ For `adb reverse`, run `adb reverse tcp:8090 tcp:8090` and start the mock with
 | Play first result | “Preparing audio…” → player opens and progress advances |
 | Next / auto-advance | Later queue tracks resolve lazily and play |
 | Seek | The mock supports HTTP Range on its audio endpoint |
-| Muxed fallback | `/muxed/{id}` is advertised as a muxed MP4 candidate; the mock serves M4A bytes with a video MIME |
+| Muxed candidate | `/muxed/{id}` is advertised as a muxed MP4 candidate (used only on API ≥ 12); the mock serves M4A bytes with a video MIME |
 | Stop the mock | New searches fail; an already-resolved queue continues |
 | Bad search | Empty-state text appears |
 

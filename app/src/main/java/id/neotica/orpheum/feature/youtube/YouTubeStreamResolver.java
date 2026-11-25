@@ -27,7 +27,9 @@ public class YouTubeStreamResolver implements PlaybackManager.StreamUrlResolver 
 
     @Override
     public boolean onPlaybackError(Track track, int what, int extra) {
-        YouTubeDiagnostics.append("Player error: what=" + what + " extra=" + extra);
+        YouTubeDiagnostics.append(what < 0
+                ? "Player prepare timed out"
+                : "Player error: what=" + what + " extra=" + extra);
         return YouTubeManager.get(context).onPlaybackError(track);
     }
 }

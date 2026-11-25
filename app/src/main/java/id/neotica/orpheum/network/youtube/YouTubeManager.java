@@ -44,6 +44,8 @@ public final class YouTubeManager {
             new HashMap<String, ArrayList<Candidate>>();
     private final HashMap<String, Integer> cursors = new HashMap<String, Integer>();
     private final HashMap<String, Prepared> prepared = new HashMap<String, Prepared>();
+    private final HashMap<String, ArrayList<Candidate>> muxedCandidates =
+            new HashMap<String, ArrayList<Candidate>>();
     private final HashMap<String, HashSet<String>> failedInstances =
             new HashMap<String, HashSet<String>>();
     private final Random random = new Random();
@@ -140,6 +142,7 @@ public final class YouTubeManager {
         }
 
         ensureInstances();
+        YouTubeDiagnostics.start(videoId, track.title);
 
         HashSet<String> attempted = new HashSet<String>();
         synchronized (lock) {
@@ -208,6 +211,7 @@ public final class YouTubeManager {
             }
             candidates.remove(videoId);
             cursors.remove(videoId);
+            muxedCandidates.remove(videoId);
             failedInstances.remove(videoId);
             return false;
         }
@@ -232,8 +236,7 @@ public final class YouTubeManager {
 
     private ArrayList<Candidate> loadCandidatesLocked(String videoId,
                                                        HashSet<String> attempted) throws IOException {
-        ArrayList<Instance> pool = new ArrayList<Instance>(instances);
-        Collections.shuffle(pool, random);
+        ArrayList<Instance> pool = orderedInstances();
         IOException lastError = null;
         for (int i = 0; i < pool.size(); i++) {
             Instance current = pool.get(i);
@@ -242,12 +245,26 @@ public final class YouTubeManager {
             }
             attempted.add(current.key);
             try {
-                ArrayList<Candidate> result = current.type == TYPE_INVIDIOUS
+                CandidateSet set = current.type == TYPE_INVIDIOUS
                         ? candidatesInvidious(current, videoId)
                         : candidatesPiped(current, videoId);
-                if (!result.isEmpty()) {
-                    return result;
+                if (SdkCompat.atLeast(12) && !set.muxed.isEmpty()) {
+                    ArrayList<Candidate> pending = muxedCandidates.get(videoId);
+                    if (pending == null) {
+                        pending = new ArrayList<Candidate>();
+                        muxedCandidates.put(videoId, pending);
+                    }
+                    pending.addAll(set.muxed);
                 }
+                if (!set.audio.isEmpty()) {
+                    YouTubeDiagnostics.append("Instance " + current.label
+                            + ": " + set.audio.size() + " audio candidate(s)");
+                    return set.audio;
+                }
+                YouTubeDiagnostics.append("Instance " + current.label
+                        + ": no audio-only M4A"
+                        + (set.muxed.isEmpty() ? "" : " (" + set.muxed.size()
+                        + " muxed candidate(s))"));
             } catch (Throwable t) {
                 if (isDeadError(t)) {
                     removeInstance(current);
@@ -258,15 +275,39 @@ public final class YouTubeManager {
                 YouTubeDiagnostics.append("Instance " + current.label + ": " + message(t));
             }
         }
+
+        if (SdkCompat.atLeast(12)) {
+            ArrayList<Candidate> pending = muxedCandidates.remove(videoId);
+            if (pending != null && !pending.isEmpty()) {
+                return pending;
+            }
+        }
         throw lastError != null
                 ? lastError
-                : new IOException("No playable YouTube audio for this device");
+                : new IOException("No playable audio-only stream for this device");
+    }
+
+    private ArrayList<Instance> orderedInstances() {
+        ArrayList<Instance> piped = new ArrayList<Instance>();
+        ArrayList<Instance> invidious = new ArrayList<Instance>();
+        for (int i = 0; i < instances.size(); i++) {
+            Instance instance = instances.get(i);
+            if (instance.type == TYPE_PIPED) {
+                piped.add(instance);
+            } else {
+                invidious.add(instance);
+            }
+        }
+        Collections.shuffle(piped, random);
+        Collections.shuffle(invidious, random);
+        piped.addAll(invidious);
+        return piped;
     }
 
     private Prepared prepare(String videoId, Candidate candidate) throws IOException {
-        YouTubeDiagnostics.set("Instance: " + candidate.instance
-                + "\nFormat: " + candidate.format
-                + "\nURL: " + YouTubeUrlHelper.safeUrl(candidate.url));
+        YouTubeDiagnostics.append("Candidate: " + candidate.instance
+                + " | " + candidate.format
+                + " | " + YouTubeUrlHelper.safeUrl(candidate.url));
 
         Prepared result = new Prepared();
         result.instanceKey = candidate.instanceKey;
@@ -530,8 +571,8 @@ public final class YouTubeManager {
         return tracks;
     }
 
-    private ArrayList<Candidate> candidatesInvidious(Instance instance,
-                                                      String videoId) throws Exception {
+    private CandidateSet candidatesInvidious(Instance instance,
+                                             String videoId) throws Exception {
         String url = instance.base + "/api/v1/videos/"
                 + YouTubeUrlHelper.encode(videoId) + "?local=true";
         JSONObject root = new JSONObject(YouTubeHttp.get(url, 20000));
@@ -540,7 +581,7 @@ public final class YouTubeManager {
             throw new IOException(error);
         }
 
-        ArrayList<Candidate> audio = new ArrayList<Candidate>();
+        CandidateSet result = new CandidateSet();
         HashSet<String> seen = new HashSet<String>();
         JSONArray formats = root.optJSONArray("adaptiveFormats");
         if (formats != null) {
@@ -557,22 +598,13 @@ public final class YouTubeManager {
                 if (mediaUrl.length() == 0) {
                     continue;
                 }
-                mediaUrl = YouTubeUrlHelper.mapThrough(instance.base, mediaUrl);
-                if (mediaUrl.length() == 0 || !seen.add(mediaUrl)) {
-                    continue;
-                }
                 int bitrate = parseInt(JsonHelper.getString(format, "bitrate"));
-                Candidate candidate = new Candidate(
-                        mediaUrl,
-                        instance.label,
-                        instance.key,
-                        "audio/mp4 " + bitrate + " bits/s",
-                        "m4a",
-                        bitrate);
-                audio.add(candidate);
+                addAudioCandidate(result.audio, seen, instance,
+                        mediaUrl, instance.base,
+                        "audio/mp4 " + bitrate + " bits/s", "m4a", bitrate);
             }
         }
-        Collections.sort(audio, new Comparator<Candidate>() {
+        Collections.sort(result.audio, new Comparator<Candidate>() {
             @Override
             public int compare(Candidate a, Candidate b) {
                 if (a.rank == b.rank) {
@@ -582,7 +614,9 @@ public final class YouTubeManager {
             }
         });
 
-        ArrayList<Candidate> muxed = new ArrayList<Candidate>();
+        if (!SdkCompat.atLeast(12)) {
+            return result;
+        }
         JSONArray streamFormats = root.optJSONArray("formatStreams");
         if (streamFormats != null) {
             for (int i = 0; i < streamFormats.length(); i++) {
@@ -604,7 +638,7 @@ public final class YouTubeManager {
                 }
                 int height = parseHeight(JsonHelper.getString(format, "resolution"));
                 String quality = JsonHelper.getString(format, "quality");
-                muxed.add(new Candidate(
+                result.muxed.add(new Candidate(
                         mediaUrl,
                         instance.label,
                         instance.key,
@@ -613,7 +647,7 @@ public final class YouTubeManager {
                         height));
             }
         }
-        Collections.sort(muxed, new Comparator<Candidate>() {
+        Collections.sort(result.muxed, new Comparator<Candidate>() {
             @Override
             public int compare(Candidate a, Candidate b) {
                 if (a.rank == b.rank) {
@@ -622,12 +656,11 @@ public final class YouTubeManager {
                 return a.rank < b.rank ? -1 : 1;
             }
         });
-        audio.addAll(muxed);
-        return audio;
+        return result;
     }
 
-    private ArrayList<Candidate> candidatesPiped(Instance instance,
-                                                  String videoId) throws Exception {
+    private CandidateSet candidatesPiped(Instance instance,
+                                         String videoId) throws Exception {
         String url = instance.base + "/streams/" + YouTubeUrlHelper.encode(videoId);
         JSONObject root = new JSONObject(YouTubeHttp.get(url, 20000));
         String error = JsonHelper.getString(root, "error");
@@ -635,7 +668,7 @@ public final class YouTubeManager {
             throw new IOException(error);
         }
 
-        ArrayList<Candidate> audio = new ArrayList<Candidate>();
+        CandidateSet result = new CandidateSet();
         HashSet<String> seen = new HashSet<String>();
         JSONArray streams = root.optJSONArray("audioStreams");
         if (streams != null) {
@@ -656,21 +689,13 @@ public final class YouTubeManager {
                 if (mediaUrl.length() == 0) {
                     continue;
                 }
-                mediaUrl = YouTubeUrlHelper.mapThrough(instance.proxy, mediaUrl);
-                if (mediaUrl.length() == 0 || !seen.add(mediaUrl)) {
-                    continue;
-                }
                 int bitrate = JsonHelper.getInt(stream, "bitrate", 0);
-                audio.add(new Candidate(
-                        mediaUrl,
-                        instance.label,
-                        instance.key,
-                        "audio/mp4 " + bitrate + " bits/s",
-                        "m4a",
-                        bitrate));
+                addAudioCandidate(result.audio, seen, instance,
+                        mediaUrl, instance.proxy,
+                        "audio/mp4 " + bitrate + " bits/s", "m4a", bitrate);
             }
         }
-        Collections.sort(audio, new Comparator<Candidate>() {
+        Collections.sort(result.audio, new Comparator<Candidate>() {
             @Override
             public int compare(Candidate a, Candidate b) {
                 if (a.rank == b.rank) {
@@ -680,7 +705,9 @@ public final class YouTubeManager {
             }
         });
 
-        ArrayList<Candidate> muxed = new ArrayList<Candidate>();
+        if (!SdkCompat.atLeast(12)) {
+            return result;
+        }
         JSONArray videoStreams = root.optJSONArray("videoStreams");
         if (videoStreams != null) {
             for (int i = 0; i < videoStreams.length(); i++) {
@@ -701,7 +728,7 @@ public final class YouTubeManager {
                     continue;
                 }
                 int height = JsonHelper.getInt(stream, "height", 0);
-                muxed.add(new Candidate(
+                result.muxed.add(new Candidate(
                         mediaUrl,
                         instance.label,
                         instance.key,
@@ -710,7 +737,7 @@ public final class YouTubeManager {
                         height));
             }
         }
-        Collections.sort(muxed, new Comparator<Candidate>() {
+        Collections.sort(result.muxed, new Comparator<Candidate>() {
             @Override
             public int compare(Candidate a, Candidate b) {
                 if (a.rank == b.rank) {
@@ -719,8 +746,23 @@ public final class YouTubeManager {
                 return a.rank < b.rank ? -1 : 1;
             }
         });
-        audio.addAll(muxed);
-        return audio;
+        return result;
+    }
+
+    private void addAudioCandidate(ArrayList<Candidate> audio, HashSet<String> seen,
+                                   Instance instance, String rawUrl, String proxyBase,
+                                   String format, String ext, int bitrate) {
+        String proxied = YouTubeUrlHelper.mapThrough(proxyBase, rawUrl);
+        if (proxied.length() > 0 && seen.add(proxied)) {
+            audio.add(new Candidate(proxied, instance.label, instance.key,
+                    format, ext, bitrate));
+        }
+        if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+            if (!rawUrl.equals(proxied) && seen.add(rawUrl)) {
+                audio.add(new Candidate(rawUrl, instance.label + " direct",
+                        instance.key, format + " (direct)", ext, bitrate));
+            }
+        }
     }
 
     private static int parseInt(String value) {
@@ -781,6 +823,11 @@ public final class YouTubeManager {
             this.label = (type == TYPE_INVIDIOUS ? "Invidious " : "Piped ")
                     + base.replace("http://", "").replace("https://", "");
         }
+    }
+
+    private static class CandidateSet {
+        final ArrayList<Candidate> audio = new ArrayList<Candidate>();
+        final ArrayList<Candidate> muxed = new ArrayList<Candidate>();
     }
 
     private static class Candidate {

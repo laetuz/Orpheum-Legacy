@@ -12,8 +12,8 @@ android {
         applicationId "id.neotica.orpheum"
         minSdkVersion 3
         targetSdkVersion 21
-        versionCode 14
-        versionName "1.7.1"
+        versionCode 15
+        versionName "1.7.2"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
         buildConfigField "String", "BASE_URL", properties.getProperty("BASE_URL", "\"http://fallback.url\"")

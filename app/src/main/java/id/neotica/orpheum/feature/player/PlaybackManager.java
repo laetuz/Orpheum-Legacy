@@ -31,7 +31,9 @@ public class PlaybackManager {
     private static boolean isPrepared;
     private static int resolveGeneration;
     private static StreamUrlResolver streamUrlResolver;
+    private static Runnable prepareTimeoutRunnable;
 
+    private static final int YOUTUBE_PREPARE_TIMEOUT_MS = 12000;
     private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private static final CopyOnWriteArrayList<PlaybackListener> listeners =
@@ -112,10 +114,14 @@ public class PlaybackManager {
         try {
             mediaPlayer.setDataSource(source);
             mediaPlayer.prepareAsync();
+            if (youtube) {
+                schedulePrepareTimeout(track);
+            }
 
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+                    clearPrepareTimeout();
                     isPrepared = true;
                     if (!mp.isPlaying()) {
                         mp.start();
@@ -141,6 +147,7 @@ public class PlaybackManager {
             mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
+                    clearPrepareTimeout();
                     isPrepared = false;
                     if ("youtube".equals(track.source)) {
                         track.streamUrl = null;
@@ -162,6 +169,37 @@ public class PlaybackManager {
         }
 
         notifyTrackChanged();
+    }
+
+    private static void schedulePrepareTimeout(final Track track) {
+        clearPrepareTimeout();
+        final int generation = resolveGeneration;
+        prepareTimeoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isPrepared || generation != resolveGeneration || queue == null
+                        || currentIndex < 0 || currentIndex >= queue.size()
+                        || queue.get(currentIndex) != track) {
+                    return;
+                }
+                releaseMediaPlayer();
+                if ("youtube".equals(track.source) && streamUrlResolver != null
+                        && streamUrlResolver.onPlaybackError(track, -1, -1)) {
+                    resolveAndPlay(track);
+                } else {
+                    notifyError("Playback timed out");
+                    notifyPlaybackStateChanged();
+                }
+            }
+        };
+        mainHandler.postDelayed(prepareTimeoutRunnable, YOUTUBE_PREPARE_TIMEOUT_MS);
+    }
+
+    private static void clearPrepareTimeout() {
+        if (prepareTimeoutRunnable != null) {
+            mainHandler.removeCallbacks(prepareTimeoutRunnable);
+            prepareTimeoutRunnable = null;
+        }
     }
 
     private static void resolveAndPlay(final Track track) {
@@ -397,6 +435,7 @@ public class PlaybackManager {
     }
 
     private static void releaseMediaPlayer() {
+        clearPrepareTimeout();
         if (mediaPlayer != null) {
             try {
                 if (mediaPlayer.isPlaying()) {
