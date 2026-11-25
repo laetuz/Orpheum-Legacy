@@ -147,7 +147,10 @@ class Handler(BaseHTTPRequestHandler):
             self._bytes(COVER, "image/png", head)
             return
         if path.startswith("/audio/"):
-            self._audio(head)
+            self._audio(head, "audio/mp4")
+            return
+        if path.startswith("/muxed/"):
+            self._audio(head, "video/mp4")
             return
         self._json({"error": "not found"}, head, 404)
 
@@ -193,7 +196,16 @@ class Handler(BaseHTTPRequestHandler):
                     "url": base + "/audio/" + video["id"],
                 },
             ],
-            "formatStreams": [],
+            "formatStreams": [
+                {
+                    "itag": "18",
+                    "type": 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+                    "quality": "360p",
+                    "resolution": "360p",
+                    "bitrate": "512000",
+                    "url": base + "/muxed/" + video["id"],
+                },
+            ],
         }, head)
 
     def _piped_search(self, query, head):
@@ -237,12 +249,19 @@ class Handler(BaseHTTPRequestHandler):
                     "bitrate": 128000,
                 },
             ],
-            "videoStreams": [],
+            "videoStreams": [
+                {
+                    "url": base + "/muxed/" + video["id"],
+                    "mimeType": "video/mp4",
+                    "quality": "360p",
+                    "height": 360,
+                    "videoOnly": False,
+                },
+            ],
         }, head)
 
-    def _audio(self, head):
+    def _audio(self, head, content_type="audio/mp4"):
         data = m4a_bytes()
-        content_type = "audio/mp4"
         if not data:
             data = wav_bytes()
             content_type = "audio/wav"

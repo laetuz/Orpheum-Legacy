@@ -64,6 +64,22 @@ public final class YouTubeUrlHelper {
         return normalizedBase + "/" + value;
     }
 
+    public static String safeUrl(String value) {
+        if (value == null || value.length() == 0) {
+            return "";
+        }
+        try {
+            java.net.URL url = new java.net.URL(value);
+            String path = url.getPath();
+            int port = url.getPort();
+            return url.getProtocol() + "://" + url.getHost()
+                    + (port > 0 ? ":" + port : "")
+                    + (path == null ? "" : path);
+        } catch (Throwable t) {
+            return "";
+        }
+    }
+
     public static String videoIdFromUrl(String url) {
         if (url == null) {
             return "";

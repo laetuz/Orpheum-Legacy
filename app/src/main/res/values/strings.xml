@@ -79,6 +79,8 @@
     <string name="youtube_instances_saved">YouTube instance list saved</string>
     <string name="youtube_instances_invalid">Invalid instance list URL</string>
     <string name="youtube_instances_not_loaded">Not loaded</string>
+    <string name="youtube_diagnostics">Diagnostics</string>
+    <string name="youtube_diagnostics_none">No YouTube playback attempt yet.</string>
 
     <!-- Home -->
     <string name="home_recent_albums">Recent Albums</string>

@@ -47,6 +47,8 @@ public class PlaybackManager {
 
     public interface StreamUrlResolver {
         String resolve(Track track) throws Exception;
+
+        boolean onPlaybackError(Track track, int what, int extra);
     }
 
     public static void setStreamUrlResolver(StreamUrlResolver resolver) {
@@ -142,6 +144,11 @@ public class PlaybackManager {
                     isPrepared = false;
                     if ("youtube".equals(track.source)) {
                         track.streamUrl = null;
+                        if (streamUrlResolver != null
+                                && streamUrlResolver.onPlaybackError(track, what, extra)) {
+                            resolveAndPlay(track);
+                            return true;
+                        }
                     }
                     notifyError("Error playing track");
                     notifyPlaybackStateChanged();

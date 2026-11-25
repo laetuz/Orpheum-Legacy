@@ -30,6 +30,7 @@ public class SettingsActivity extends Activity implements SettingsView {
     private TextView tvSource;
     private TextView tvSourceDetail;
     private TextView tvYoutubeStatus;
+    private TextView tvYoutubeDiagnostics;
     private EditText etYoutubeUrl;
     private TextView tvVersion;
     private TextView tvDownloads;
@@ -53,6 +54,7 @@ public class SettingsActivity extends Activity implements SettingsView {
         tvSource = (TextView) findViewById(R.id.tv_settings_source);
         tvSourceDetail = (TextView) findViewById(R.id.tv_settings_source_detail);
         tvYoutubeStatus = (TextView) findViewById(R.id.tv_settings_youtube_status);
+        tvYoutubeDiagnostics = (TextView) findViewById(R.id.tv_settings_youtube_diagnostics);
         etYoutubeUrl = (EditText) findViewById(R.id.et_settings_youtube_url);
         etYoutubeUrl.clearFocus();
         tvVersion = (TextView) findViewById(R.id.tv_settings_version);
@@ -143,6 +145,11 @@ public class SettingsActivity extends Activity implements SettingsView {
             etYoutubeUrl.setText(listUrl);
         }
         tvYoutubeStatus.setText(summary);
+    }
+
+    @Override
+    public void renderYouTubeDiagnostics(String report) {
+        tvYoutubeDiagnostics.setText(report);
     }
 
     @Override

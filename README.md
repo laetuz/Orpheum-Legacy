@@ -12,7 +12,7 @@ Built for vintage Android hardware locked out of modern streaming apps and TLS/S
 - **Background audio service** — foreground `AudioService` with an ongoing notification (Play/Pause & Next controls on API 16+, reflection-based foreground fallback down to API 3)
 - **Offline mode** — download albums (tracks + cover) via foreground `DownloadService` to `<external>/Orpheum/downloads/` (with internal storage fallback), automatic offline playback, and a Downloads screen accessible from Home
 - **Internet radio** — browse and search TuneIn stations and shows (via `opml.radiotime.com`) with M3U/PLS playlist resolution, live station and on-demand episode playback in the same player, and local favorite stations/shows
-- **YouTube audio (unofficial)** — search YouTube through Invidious/Piped instances and play audio-only results in the existing player and queue, with lazy stream resolution; no account, playlists, or downloads. Uses public third-party instances (configurable in Settings)
+- **YouTube audio (unofficial)** — search YouTube through Invidious/Piped instances and play audio-only results in the existing player and queue, with lazy stream resolution and a Gingerbread-safe pre-download/muxed fallback; no account, playlists, or downloads. Uses public third-party instances (configurable in Settings)
 - **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and a Settings screen with profile, active music source, app version, downloaded-storage summary, cover-cache clearing, and logout
 - **Subsonic / OpenSubsonic** — connect your own Navidrome, LMS, or Supysonic server (HTTP or HTTPS) alongside the Orpheum backend; browse Home/New Releases/Search, open albums, stream MP3-transcoded audio, and download albums for offline playback; switch sources in Settings without losing downloads
 - **Trackball / D-pad navigation** — focusable rows with an orange selection highlight
@@ -72,7 +72,7 @@ The YouTube screen is unofficial and relies on public Invidious/Piped instances.
 python3 tools/youtube-mock/mock_server.py --port 8090
 ```
 
-Then set **Settings → YouTube → Instance list URL** to `http://10.0.2.2:8090/instances.json`. The mock serves canned search results, covers, and a generated AAC/M4A tone. It does not contact YouTube and is not part of Orpheum's backend.
+Then set **Settings → YouTube → Instance list URL** to `http://10.0.2.2:8090/instances.json`. The mock serves canned search results, covers, audio-only and muxed audio candidates, and a generated AAC/M4A tone. Settings also shows the last YouTube resolution/playback diagnostics. It does not contact YouTube and is not part of Orpheum's backend.
 
 > The YouTube feature is an unofficial extractor using third-party instances. It can break when instances are blocked, is subject to YouTube's Terms of Service, and is not affiliated with YouTube or YouTube Music.
 

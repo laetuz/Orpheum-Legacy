@@ -11,6 +11,7 @@ import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.downloads.DownloadStore;
 import id.neotica.orpheum.feature.settings.contract.SettingsView;
 import id.neotica.orpheum.network.youtube.YouTubeConfig;
+import id.neotica.orpheum.network.youtube.YouTubeDiagnostics;
 import id.neotica.orpheum.network.youtube.YouTubeManager;
 import id.neotica.orpheum.source.MusicSource;
 import id.neotica.orpheum.source.SourceManager;
@@ -60,6 +61,7 @@ public class SettingsPresenter {
             YouTubeConfig youTubeConfig = new YouTubeConfig(context);
             view.renderYouTube(youTubeConfig.getListUrl(),
                     YouTubeManager.get(context).getInstanceSummary());
+            view.renderYouTubeDiagnostics(YouTubeDiagnostics.getReport());
             view.renderVersion(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
         }
         new Thread(new Runnable() {
@@ -105,6 +107,7 @@ public class SettingsPresenter {
         if (view != null) {
             view.showMessage(context.getString(R.string.youtube_instances_saved));
             view.renderYouTube(url, context.getString(R.string.youtube_instances_not_loaded));
+            view.renderYouTubeDiagnostics(YouTubeDiagnostics.getReport());
         }
     }
 

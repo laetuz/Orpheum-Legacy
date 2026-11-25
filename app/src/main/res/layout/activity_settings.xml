@@ -115,6 +115,24 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/youtube_instances_save" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/youtube_diagnostics"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#AAFFFFFF"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tv_settings_youtube_diagnostics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/youtube_diagnostics_none"
+                android:textSize="12sp"
+                android:paddingBottom="8dp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

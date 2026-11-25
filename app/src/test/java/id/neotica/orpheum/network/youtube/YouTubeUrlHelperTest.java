@@ -28,6 +28,12 @@ public class YouTubeUrlHelperTest {
     }
 
     @Test
+    public void reportsSafeUrlWithoutQuery() {
+        assertEquals("http://host:8080/audio/id",
+                YouTubeUrlHelper.safeUrl("http://host:8080/audio/id?token=secret"));
+    }
+
+    @Test
     public void extractsVideoIds() {
         assertEquals("abc123", YouTubeUrlHelper.videoIdFromUrl("/watch?v=abc123"));
         assertEquals("abc123", YouTubeUrlHelper.videoIdFromUrl(
