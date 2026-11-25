@@ -10,6 +10,8 @@ import id.neotica.orpheum.BuildConfig;
 import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.downloads.DownloadStore;
 import id.neotica.orpheum.feature.settings.contract.SettingsView;
+import id.neotica.orpheum.network.youtube.YouTubeConfig;
+import id.neotica.orpheum.network.youtube.YouTubeManager;
 import id.neotica.orpheum.source.MusicSource;
 import id.neotica.orpheum.source.SourceManager;
 
@@ -55,6 +57,9 @@ public class SettingsPresenter {
         if (view != null) {
             view.renderProfile(profile);
             view.renderSource(label, detail, subsonic);
+            YouTubeConfig youTubeConfig = new YouTubeConfig(context);
+            view.renderYouTube(youTubeConfig.getListUrl(),
+                    YouTubeManager.get(context).getInstanceSummary());
             view.renderVersion(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE);
         }
         new Thread(new Runnable() {
@@ -72,6 +77,35 @@ public class SettingsPresenter {
                 });
             }
         }).start();
+    }
+
+    public void saveYouTubeListUrl(String rawUrl) {
+        String url = rawUrl == null ? "" : rawUrl.trim();
+        if (url.length() == 0) {
+            if (view != null) {
+                view.showMessage(context.getString(R.string.youtube_instances_invalid));
+            }
+            return;
+        }
+        if (!url.contains("://")) {
+            url = "http://" + url;
+        }
+        String lower = url.toLowerCase();
+        if (!lower.startsWith("http://") && !lower.startsWith("https://")) {
+            if (view != null) {
+                view.showMessage(context.getString(R.string.youtube_instances_invalid));
+            }
+            return;
+        }
+
+        YouTubeConfig config = new YouTubeConfig(context);
+        config.setListUrl(url);
+        config.clearCache();
+        YouTubeManager.reset();
+        if (view != null) {
+            view.showMessage(context.getString(R.string.youtube_instances_saved));
+            view.renderYouTube(url, context.getString(R.string.youtube_instances_not_loaded));
+        }
     }
 
     public void switchSource(String sourceId) {

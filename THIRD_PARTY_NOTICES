@@ -20,14 +20,21 @@ Bundled in the distributed application
    Licensed under the Apache License, Version 2.0
    http://www.apache.org/licenses/LICENSE-2.0
 
+3. notPipe
+   https://github.com/gohoski/notPipe
+   YouTube API/instance handling adapted for Orpheum's audio-only screen.
+   Licensed under the Do What The Fuck You Want To Public License, Version 2.
+   http://www.wtfpl.net/
+
 Build- and test-only (not distributed in the app)
 -------------------------------------------------
 
-3. JUnit 4.12
+4. JUnit 4.12
    junit:junit:4.12
    Licensed under the Eclipse Public License 1.0
 
 Compatibility note
 ------------------
 The Apache License 2.0 (Universal Image Loader, Android Open Source Project)
-is compatible with the GNU GPL v3.0 under which this project is distributed.
+and the WTFPL (notPipe) are compatible with the GNU GPL v3.0 under which this
+project is distributed.

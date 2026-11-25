@@ -33,6 +33,7 @@ import id.neotica.orpheum.feature.search.ui.SearchActivity;
 import id.neotica.orpheum.feature.settings.ui.SettingsActivity;
 import id.neotica.orpheum.feature.subsonic.ui.SubsonicLoginActivity;
 import id.neotica.orpheum.feature.trackfeed.ui.TrackFeedActivity;
+import id.neotica.orpheum.feature.youtube.ui.YouTubeActivity;
 import id.neotica.orpheum.model.Album;
 import id.neotica.orpheum.model.Track;
 import id.neotica.orpheum.ui.components.NowPlayingBarHelper;
@@ -125,6 +126,13 @@ public class MainActivity extends Activity implements HomeView {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MainActivity.this, RadioActivity.class));
+            }
+        });
+
+        findViewById(R.id.btn_youtube).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, YouTubeActivity.class));
             }
         });
 

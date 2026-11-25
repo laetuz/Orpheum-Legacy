@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,8 @@ public class SettingsActivity extends Activity implements SettingsView {
     private TextView tvUsername;
     private TextView tvSource;
     private TextView tvSourceDetail;
+    private TextView tvYoutubeStatus;
+    private EditText etYoutubeUrl;
     private TextView tvVersion;
     private TextView tvDownloads;
     private Button btnLogout;
@@ -49,9 +52,13 @@ public class SettingsActivity extends Activity implements SettingsView {
         tvUsername = (TextView) findViewById(R.id.tv_settings_username);
         tvSource = (TextView) findViewById(R.id.tv_settings_source);
         tvSourceDetail = (TextView) findViewById(R.id.tv_settings_source_detail);
+        tvYoutubeStatus = (TextView) findViewById(R.id.tv_settings_youtube_status);
+        etYoutubeUrl = (EditText) findViewById(R.id.et_settings_youtube_url);
+        etYoutubeUrl.clearFocus();
         tvVersion = (TextView) findViewById(R.id.tv_settings_version);
         tvDownloads = (TextView) findViewById(R.id.tv_settings_downloads);
         Button btnSwitchSource = (Button) findViewById(R.id.btn_switch_source);
+        Button btnSaveYoutube = (Button) findViewById(R.id.btn_settings_youtube_save);
         Button btnClearCache = (Button) findViewById(R.id.btn_clear_cover_cache);
         btnLogout = (Button) findViewById(R.id.btn_logout);
 
@@ -59,6 +66,13 @@ public class SettingsActivity extends Activity implements SettingsView {
             @Override
             public void onClick(View view) {
                 showSourceDialog();
+            }
+        });
+
+        btnSaveYoutube.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.saveYouTubeListUrl(etYoutubeUrl.getText().toString());
             }
         });
 
@@ -121,6 +135,14 @@ public class SettingsActivity extends Activity implements SettingsView {
         tvSource.setText(label);
         tvSourceDetail.setText(detail);
         btnLogout.setText(subsonicActive ? R.string.subsonic_disconnect : R.string.common_logout);
+    }
+
+    @Override
+    public void renderYouTube(String listUrl, String summary) {
+        if (!etYoutubeUrl.hasFocus()) {
+            etYoutubeUrl.setText(listUrl);
+        }
+        tvYoutubeStatus.setText(summary);
     }
 
     @Override

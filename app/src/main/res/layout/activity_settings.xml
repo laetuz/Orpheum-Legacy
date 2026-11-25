@@ -86,6 +86,45 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/settings_section_youtube"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#AAFFFFFF"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tv_settings_youtube_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:paddingBottom="4dp" />
+
+            <EditText
+                android:id="@+id/et_settings_youtube_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/youtube_instances_url"
+                android:singleLine="true"
+                android:inputType="textUri" />
+
+            <Button
+                android:id="@+id/btn_settings_youtube_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/youtube_instances_save" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33FFFFFF"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="@string/settings_section_about"
                 android:textSize="12sp"
                 android:textStyle="bold"

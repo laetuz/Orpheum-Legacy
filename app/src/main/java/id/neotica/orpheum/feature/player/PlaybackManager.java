@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import java.io.File;
@@ -27,6 +29,10 @@ public class PlaybackManager {
     private static ArrayList<Track> queue;
     private static int currentIndex;
     private static boolean isPrepared;
+    private static int resolveGeneration;
+    private static StreamUrlResolver streamUrlResolver;
+
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private static final CopyOnWriteArrayList<PlaybackListener> listeners =
             new CopyOnWriteArrayList<PlaybackListener>();
@@ -39,6 +45,14 @@ public class PlaybackManager {
         void onError(String error);
     }
 
+    public interface StreamUrlResolver {
+        String resolve(Track track) throws Exception;
+    }
+
+    public static void setStreamUrlResolver(StreamUrlResolver resolver) {
+        streamUrlResolver = resolver;
+    }
+
     public static void init(ArrayList<Track> tracks, int index) {
         if (tracks == null || tracks.isEmpty() || index < 0 || index >= tracks.size()) {
             return;
@@ -47,6 +61,7 @@ public class PlaybackManager {
         queue = new ArrayList<Track>(tracks);
         currentIndex = index;
         isPrepared = false;
+        resolveGeneration++;
 
         releaseMediaPlayer();
         playTrack();
@@ -58,13 +73,14 @@ public class PlaybackManager {
             return;
         }
 
-        Track track = queue.get(currentIndex);
+        final Track track = queue.get(currentIndex);
         if (track == null || TextUtils.isEmpty(track.id)) {
             return;
         }
 
         releaseMediaPlayer();
 
+        boolean youtube = "youtube".equals(track.source);
         String source = track.localPath;
         if (!TextUtils.isEmpty(source) && !new File(source).exists()) {
             source = null;
@@ -72,11 +88,20 @@ public class PlaybackManager {
         if (TextUtils.isEmpty(source)) {
             source = track.streamUrl;
         }
-        if (TextUtils.isEmpty(source)) {
+        if (TextUtils.isEmpty(source) && !youtube) {
             source = DownloadStore.findTrackFile(track.id);
         }
-        if (TextUtils.isEmpty(source)) {
+        if (TextUtils.isEmpty(source) && !youtube) {
             source = Constants.ORPHEUM_BASE + "/stream/" + track.id;
+        }
+        if (TextUtils.isEmpty(source)) {
+            if (youtube) {
+                resolveAndPlay(track);
+            } else {
+                notifyError("Could not prepare audio");
+                notifyPlaybackStateChanged();
+            }
+            return;
         }
 
         mediaPlayer = new MediaPlayer();
@@ -103,6 +128,7 @@ public class PlaybackManager {
                     notifyCompletion();
                     if (queue != null && currentIndex + 1 < queue.size()) {
                         currentIndex++;
+                        resolveGeneration++;
                         playTrack();
                     } else {
                         notifyPlaybackStateChanged();
@@ -114,7 +140,11 @@ public class PlaybackManager {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     isPrepared = false;
+                    if ("youtube".equals(track.source)) {
+                        track.streamUrl = null;
+                    }
                     notifyError("Error playing track");
+                    notifyPlaybackStateChanged();
                     return true;
                 }
             });
@@ -125,6 +155,53 @@ public class PlaybackManager {
         }
 
         notifyTrackChanged();
+    }
+
+    private static void resolveAndPlay(final Track track) {
+        final StreamUrlResolver resolver = streamUrlResolver;
+        if (resolver == null) {
+            notifyError("Could not prepare audio");
+            notifyPlaybackStateChanged();
+            return;
+        }
+
+        final int generation = resolveGeneration;
+        final int index = currentIndex;
+        notifyTrackChanged();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String resolved = null;
+                String error = null;
+                try {
+                    resolved = resolver.resolve(track);
+                } catch (Throwable t) {
+                    error = t.getMessage();
+                }
+                final String url = resolved;
+                final String failure = error;
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (generation != resolveGeneration || queue == null
+                                || currentIndex != index || queue.get(index) != track) {
+                            return;
+                        }
+                        if (!TextUtils.isEmpty(url)) {
+                            track.streamUrl = url;
+                            playTrack();
+                        } else {
+                            isPrepared = false;
+                            notifyError(failure != null && failure.length() > 0
+                                    ? failure
+                                    : "Could not prepare audio");
+                            notifyPlaybackStateChanged();
+                        }
+                    }
+                });
+            }
+        }).start();
     }
 
     public static void toggle() {
@@ -149,6 +226,7 @@ public class PlaybackManager {
             return;
         }
         currentIndex++;
+        resolveGeneration++;
         playTrack();
     }
 
@@ -158,6 +236,7 @@ public class PlaybackManager {
         }
         if (currentIndex - 1 >= 0) {
             currentIndex--;
+            resolveGeneration++;
             playTrack();
         } else if (mediaPlayer != null && isPrepared) {
             mediaPlayer.seekTo(0);
@@ -212,6 +291,7 @@ public class PlaybackManager {
             return;
         }
         currentIndex = index;
+        resolveGeneration++;
         playTrack();
     }
 
@@ -230,6 +310,7 @@ public class PlaybackManager {
     }
 
     public static void release() {
+        resolveGeneration++;
         releaseMediaPlayer();
         queue = null;
         currentIndex = 0;

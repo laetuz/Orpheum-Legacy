@@ -21,7 +21,9 @@
         <activity android:name=".feature.auth.forgotpassword.ui.ForgotPasswordActivity" />
         <activity android:name=".feature.auth.register.ui.RegisterActivity" />
         <activity android:name=".feature.subsonic.ui.SubsonicLoginActivity" />
-        <activity android:name=".feature.settings.ui.SettingsActivity" />
+        <activity
+            android:name=".feature.settings.ui.SettingsActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity android:name=".feature.trackfeed.ui.TrackFeedActivity" />
         <activity android:name=".feature.albumfeed.ui.AlbumFeedActivity" />
         <activity
@@ -31,6 +33,7 @@
         <activity android:name=".feature.downloads.ui.DownloadsActivity" />
         <activity android:name=".feature.radio.ui.RadioActivity" />
         <activity android:name=".feature.radio.ui.FavoritesActivity" />
+        <activity android:name=".feature.youtube.ui.YouTubeActivity" />
         <activity android:name=".feature.player.ui.PlayerActivity" />
 
         <service

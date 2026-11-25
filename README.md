@@ -12,6 +12,7 @@ Built for vintage Android hardware locked out of modern streaming apps and TLS/S
 - **Background audio service** — foreground `AudioService` with an ongoing notification (Play/Pause & Next controls on API 16+, reflection-based foreground fallback down to API 3)
 - **Offline mode** — download albums (tracks + cover) via foreground `DownloadService` to `<external>/Orpheum/downloads/` (with internal storage fallback), automatic offline playback, and a Downloads screen accessible from Home
 - **Internet radio** — browse and search TuneIn stations and shows (via `opml.radiotime.com`) with M3U/PLS playlist resolution, live station and on-demand episode playback in the same player, and local favorite stations/shows
+- **YouTube audio (unofficial)** — search YouTube through Invidious/Piped instances and play audio-only results in the existing player and queue, with lazy stream resolution; no account, playlists, or downloads. Uses public third-party instances (configurable in Settings)
 - **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and a Settings screen with profile, active music source, app version, downloaded-storage summary, cover-cache clearing, and logout
 - **Subsonic / OpenSubsonic** — connect your own Navidrome, LMS, or Supysonic server (HTTP or HTTPS) alongside the Orpheum backend; browse Home/New Releases/Search, open albums, stream MP3-transcoded audio, and download albums for offline playback; switch sources in Settings without losing downloads
 - **Trackball / D-pad navigation** — focusable rows with an orange selection highlight
@@ -55,13 +56,25 @@ AGP 2.3.2 is resolved from JCenter mirrors (Aliyun + Huawei Cloud) configured in
 
 ### Subsonic development server
 
-The Subsonic client needs a server to talk to; no backend or Docker setup is required. A throwaway mock lives in `tools/subsonic-mock/`:
+The Subsonic client needs a server to talk to; no backend or Docker setup is required. A throwaway mock lives in `tools/subsonic-mock/` — see [`tools/subsonic-mock/README.md`](tools/subsonic-mock/README.md) for the full test checklist:
 
 ```sh
 python3 tools/subsonic-mock/mock_server.py --port 8080
 ```
 
 Point an emulator at `http://10.0.2.2:8080` (any username/password). For a physical device, add `--host 0.0.0.0` and use your Mac's LAN address. It serves canned albums/tracks, generated covers, and a short WAV tone through the same endpoints as a real server. Real users connect Orpheum to their own Navidrome/LMS/Supysonic instance; nothing is proxied through or stored on the Orpheum backend.
+
+### YouTube development server
+
+The YouTube screen is unofficial and relies on public Invidious/Piped instances. For local testing without YouTube, a dev-only mock lives in `tools/youtube-mock/` — see [`tools/youtube-mock/README.md`](tools/youtube-mock/README.md):
+
+```sh
+python3 tools/youtube-mock/mock_server.py --port 8090
+```
+
+Then set **Settings → YouTube → Instance list URL** to `http://10.0.2.2:8090/instances.json`. The mock serves canned search results, covers, and a generated AAC/M4A tone. It does not contact YouTube and is not part of Orpheum's backend.
+
+> The YouTube feature is an unofficial extractor using third-party instances. It can break when instances are blocked, is subject to YouTube's Terms of Service, and is not affiliated with YouTube or YouTube Music.
 
 ## CI / Releasing
 

@@ -23,6 +23,7 @@
     <!-- Settings -->
     <string name="settings_section_account">Account</string>
     <string name="settings_section_source">Music source</string>
+    <string name="settings_section_youtube">YouTube</string>
     <string name="settings_section_about">About</string>
     <string name="settings_section_storage">Storage</string>
     <string name="settings_switch_source">Switch source</string>
@@ -64,6 +65,20 @@
     <string name="subsonic_error_server">Enter server URL</string>
     <string name="subsonic_error_invalid_server">Invalid server URL</string>
     <string name="subsonic_disconnected">Disconnected from server</string>
+
+    <!-- YouTube -->
+    <string name="youtube_title">YouTube</string>
+    <string name="youtube_search_hint">Search YouTube...</string>
+    <string name="youtube_empty">Search YouTube for audio</string>
+    <string name="youtube_no_results">No results found.</string>
+    <string name="youtube_searching">Searching YouTube...</string>
+    <string name="youtube_preparing">Preparing audio...</string>
+    <string name="youtube_instances_title">YouTube</string>
+    <string name="youtube_instances_url">Instance list URL</string>
+    <string name="youtube_instances_save">Save YouTube instances</string>
+    <string name="youtube_instances_saved">YouTube instance list saved</string>
+    <string name="youtube_instances_invalid">Invalid instance list URL</string>
+    <string name="youtube_instances_not_loaded">Not loaded</string>
 
     <!-- Home -->
     <string name="home_recent_albums">Recent Albums</string>
