@@ -16,6 +16,7 @@ import io
 import json
 import math
 import os
+import shutil
 import struct
 import subprocess
 import tempfile
@@ -35,6 +36,7 @@ VIDEOS = [
 
 WAV_BYTES = None
 M4A_BYTES = None
+MUXED_BYTES = None
 
 
 def wav_bytes():
@@ -80,6 +82,40 @@ def m4a_bytes():
         pass
     M4A_BYTES = b""
     return M4A_BYTES
+
+
+def muxed_bytes():
+    global MUXED_BYTES
+    if MUXED_BYTES is not None:
+        return MUXED_BYTES
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        MUXED_BYTES = b""
+        return MUXED_BYTES
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            wav_path = os.path.join(tmp, "tone.wav")
+            out_path = os.path.join(tmp, "muxed.mp4")
+            with open(wav_path, "wb") as wav_file:
+                wav_file.write(wav_bytes())
+            result = subprocess.run(
+                [ffmpeg, "-y", "-loglevel", "error",
+                 "-f", "lavfi", "-i", "color=c=blue:s=160x90:d=%d" % DURATION,
+                 "-i", wav_path,
+                 "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "ultrafast",
+                 "-c:a", "aac", "-shortest", "-movflags", "+faststart", out_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+            )
+            if result.returncode == 0 and os.path.exists(out_path):
+                with open(out_path, "rb") as muxed_file:
+                    MUXED_BYTES = muxed_file.read()
+                return MUXED_BYTES
+    except Exception:
+        pass
+    MUXED_BYTES = b""
+    return MUXED_BYTES
 
 
 def png_chunk(kind, data):
@@ -150,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
             self._audio(head, "audio/mp4")
             return
         if path.startswith("/muxed/"):
-            self._audio(head, "video/mp4")
+            self._muxed(head)
             return
         self._json({"error": "not found"}, head, 404)
 
@@ -259,6 +295,13 @@ class Handler(BaseHTTPRequestHandler):
                 },
             ],
         }, head)
+
+    def _muxed(self, head):
+        data = muxed_bytes()
+        if data:
+            self._bytes(data, "video/mp4", head)
+        else:
+            self._audio(head, "video/mp4")
 
     def _audio(self, head, content_type="audio/mp4"):
         data = m4a_bytes()

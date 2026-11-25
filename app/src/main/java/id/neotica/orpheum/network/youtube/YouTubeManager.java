@@ -248,6 +248,17 @@ public final class YouTubeManager {
                 CandidateSet set = current.type == TYPE_INVIDIOUS
                         ? candidatesInvidious(current, videoId)
                         : candidatesPiped(current, videoId);
+                if (!SdkCompat.atLeast(12)) {
+                    if (!set.muxed.isEmpty()) {
+                        YouTubeDiagnostics.append("Instance " + current.label
+                                + ": " + set.muxed.size()
+                                + " progressive muxed candidate(s)");
+                        return set.muxed;
+                    }
+                    YouTubeDiagnostics.append("Instance " + current.label
+                            + ": no progressive muxed MP4");
+                    continue;
+                }
                 if (SdkCompat.atLeast(12) && !set.muxed.isEmpty()) {
                     ArrayList<Candidate> pending = muxedCandidates.get(videoId);
                     if (pending == null) {
@@ -349,6 +360,15 @@ public final class YouTubeManager {
         } else {
             YouTubeDiagnostics.append("Using cached " + target.getName()
                     + " (" + target.length() + " bytes)");
+        }
+        if (candidate.muxed) {
+            try {
+                Mp4AudioOnlyStripper.stripVideoTrack(target);
+                YouTubeDiagnostics.append("Removed video track; audio-only MP4 ready");
+            } catch (Throwable t) {
+                target.delete();
+                throw new IOException("Cannot extract audio track: " + message(t));
+            }
         }
         result.source = target.getAbsolutePath();
         result.filePath = target.getAbsolutePath();
@@ -614,9 +634,6 @@ public final class YouTubeManager {
             }
         });
 
-        if (!SdkCompat.atLeast(12)) {
-            return result;
-        }
         JSONArray streamFormats = root.optJSONArray("formatStreams");
         if (streamFormats != null) {
             for (int i = 0; i < streamFormats.length(); i++) {
@@ -644,7 +661,8 @@ public final class YouTubeManager {
                         instance.key,
                         "muxed " + (quality.length() > 0 ? quality : height + "p"),
                         "mp4",
-                        height));
+                        height,
+                        true));
             }
         }
         Collections.sort(result.muxed, new Comparator<Candidate>() {
@@ -705,9 +723,6 @@ public final class YouTubeManager {
             }
         });
 
-        if (!SdkCompat.atLeast(12)) {
-            return result;
-        }
         JSONArray videoStreams = root.optJSONArray("videoStreams");
         if (videoStreams != null) {
             for (int i = 0; i < videoStreams.length(); i++) {
@@ -734,7 +749,8 @@ public final class YouTubeManager {
                         instance.key,
                         "muxed mp4 " + height + "p",
                         "mp4",
-                        height));
+                        height,
+                        true));
             }
         }
         Collections.sort(result.muxed, new Comparator<Candidate>() {
@@ -755,12 +771,12 @@ public final class YouTubeManager {
         String proxied = YouTubeUrlHelper.mapThrough(proxyBase, rawUrl);
         if (proxied.length() > 0 && seen.add(proxied)) {
             audio.add(new Candidate(proxied, instance.label, instance.key,
-                    format, ext, bitrate));
+                    format, ext, bitrate, false));
         }
         if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
             if (!rawUrl.equals(proxied) && seen.add(rawUrl)) {
                 audio.add(new Candidate(rawUrl, instance.label + " direct",
-                        instance.key, format + " (direct)", ext, bitrate));
+                        instance.key, format + " (direct)", ext, bitrate, false));
             }
         }
     }
@@ -837,15 +853,17 @@ public final class YouTubeManager {
         final String format;
         final String ext;
         final int rank;
+        final boolean muxed;
 
         Candidate(String url, String instance, String instanceKey,
-                  String format, String ext, int rank) {
+                  String format, String ext, int rank, boolean muxed) {
             this.url = url;
             this.instance = instance;
             this.instanceKey = instanceKey;
             this.format = format;
             this.ext = ext;
             this.rank = rank;
+            this.muxed = muxed;
         }
     }
 

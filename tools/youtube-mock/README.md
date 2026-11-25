@@ -11,6 +11,8 @@ audio file so the search → resolve → play → next flow can be tested locall
 - Python 3.7+ (standard library)
 - macOS `afconvert` for AAC/M4A output; without it the audio endpoint falls
   back to WAV while still advertising `audio/mp4` (may not play on every device)
+- `ffmpeg` for the `/muxed/{id}` progressive MP4 test candidate; without it the
+  muxed endpoint falls back to M4A bytes
 
 ## Start
 
@@ -52,7 +54,7 @@ For `adb reverse`, run `adb reverse tcp:8090 tcp:8090` and start the mock with
 | Play first result | “Preparing audio…” → player opens and progress advances |
 | Next / auto-advance | Later queue tracks resolve lazily and play |
 | Seek | The mock supports HTTP Range on its audio endpoint |
-| Muxed candidate | `/muxed/{id}` is advertised as a muxed MP4 candidate (used only on API ≥ 12); the mock serves M4A bytes with a video MIME |
+| Muxed candidate | `/muxed/{id}` serves a generated MP4 with H.264 + AAC when `ffmpeg` is available; this is the Gingerbread strip path |
 | Stop the mock | New searches fail; an already-resolved queue continues |
 | Bad search | Empty-state text appears |
 
@@ -67,7 +69,7 @@ For `adb reverse`, run `adb reverse tcp:8090 tcp:8090` and start the mock with
 | `/streams/{id}` | Piped audio streams |
 | `/vi/...` | Generated PNG cover |
 | `/audio/{id}` | Generated AAC/M4A (or WAV fallback), Range-capable |
-| `/muxed/{id}` | Same audio payload advertised as a muxed video/MP4 candidate |
+| `/muxed/{id}` | Generated progressive MP4 (video + AAC) when `ffmpeg` is available; M4A fallback |
 
 ## Limitations
 
