@@ -14,6 +14,8 @@ public interface SettingsView {
 
     void renderYouTubeDiagnostics(String report);
 
+    void renderCodecTest(String result);
+
     void renderVersion(String versionName, int versionCode);
 
     void renderDownloadsSummary(int albumCount, long totalBytes);

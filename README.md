@@ -13,7 +13,7 @@ Built for vintage Android hardware locked out of modern streaming apps and TLS/S
 - **Offline mode** — download albums (tracks + cover) via foreground `DownloadService` to `<external>/Orpheum/downloads/` (with internal storage fallback), automatic offline playback, and a Downloads screen accessible from Home
 - **Internet radio** — browse and search TuneIn stations and shows (via `opml.radiotime.com`) with M3U/PLS playlist resolution, live station and on-demand episode playback in the same player, and local favorite stations/shows
 - **YouTube audio (unofficial)** — search YouTube through Invidious/Piped instances and play audio-only results in the existing player and queue, with lazy stream resolution and a Gingerbread-safe muxed-MP4 audio-track strip; no account, playlists, or downloads. Uses public third-party instances (configurable in Settings)
-- **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and a Settings screen with profile, active music source, app version, downloaded-storage summary, cover-cache clearing, and logout
+- **Authentication & settings** — login, registration, and password reset with password-visibility toggles, JWT stored in `SharedPreferences`, and a Settings screen with profile, active music source, app version, downloaded-storage summary, cover-cache clearing, a YouTube codec self-test, and logout
 - **Subsonic / OpenSubsonic** — connect your own Navidrome, LMS, or Supysonic server (HTTP or HTTPS) alongside the Orpheum backend; browse Home/New Releases/Search, open albums, stream MP3-transcoded audio, and download albums for offline playback; switch sources in Settings without losing downloads
 - **Trackball / D-pad navigation** — focusable rows with an orange selection highlight
 - **Cover caching** — memory and disk caching via Universal Image Loader
@@ -27,7 +27,7 @@ Download the latest APK from [GitHub Releases](https://github.com/laetuz/Orpheum
 
 ## Architecture
 
-Built with the same feature-first MVP architecture as [HoloMarket](https://github.com/laetuz/HoloMarket) (see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)), backed by [orpheum-api](https://github.com/laetuz/orpheum-api) — plain `AsyncTask` + `HttpURLConnection`, `ListView` + `ArrayAdapter`, `SdkCompat`, and Universal Image Loader `1.9.5` with no Support Library / AppCompat dependencies. A small `source/` layer selects between the Orpheum API and a user-provided Subsonic server at runtime.
+Built with the same feature-first MVP architecture as [HoloMarket](https://github.com/laetuz/HoloMarket) (see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)), backed by [orpheum-api](https://github.com/laetuz/orpheum-api) — plain `AsyncTask` + `HttpURLConnection`, `ListView` + `ArrayAdapter`, `SdkCompat`, and Universal Image Loader `1.8.2` with no Support Library / AppCompat dependencies. A small `source/` layer selects between the Orpheum API and a user-provided Subsonic server at runtime.
 
 ## Prerequisites
 

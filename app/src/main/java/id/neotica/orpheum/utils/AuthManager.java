@@ -93,7 +93,7 @@ public class AuthManager {
         try {
             String[] parts = token.split("\\.");
             if (parts.length < 2) return null;
-            byte[] decoded = base64UrlDecode(parts[1]);
+            byte[] decoded = Base64Url.decode(parts[1]);
             if (decoded == null) return null;
             String json = new String(decoded, "UTF-8");
             JSONObject payload = new JSONObject(json);
@@ -109,35 +109,4 @@ public class AuthManager {
         }
     }
 
-    private static byte[] base64UrlDecode(String input) {
-        try {
-            String base64 = input.replace('-', '+').replace('_', '/');
-            int padding = 4 - base64.length() % 4;
-            if (padding != 4) {
-                base64 += "====".substring(0, padding);
-            }
-            return base64Decode(base64);
-        } catch (Throwable e) {
-            return null;
-        }
-    }
-
-    private static byte[] base64Decode(String s) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        s = s.replaceAll("[^" + chars + "=]", "");
-        if (s.length() == 0) return new byte[0];
-        int pad = s.endsWith("==") ? 2 : s.endsWith("=") ? 1 : 0;
-        byte[] out = new byte[s.length() * 3 / 4 - pad];
-        int i = 0, o = 0;
-        while (i < s.length()) {
-            int a = chars.indexOf(s.charAt(i++));
-            int b = chars.indexOf(s.charAt(i++));
-            int c = i < s.length() ? chars.indexOf(s.charAt(i++)) : 64;
-            int d = i < s.length() ? chars.indexOf(s.charAt(i++)) : 64;
-            out[o++] = (byte) ((a << 2) | (b >> 4));
-            if (c != 64) out[o++] = (byte) ((b << 4) | (c >> 2));
-            if (d != 64) out[o++] = (byte) ((c << 6) | d);
-        }
-        return out;
-    }
 }

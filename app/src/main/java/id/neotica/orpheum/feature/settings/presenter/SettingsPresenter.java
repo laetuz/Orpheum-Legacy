@@ -15,6 +15,7 @@ import id.neotica.orpheum.network.youtube.YouTubeDiagnostics;
 import id.neotica.orpheum.network.youtube.YouTubeManager;
 import id.neotica.orpheum.source.MusicSource;
 import id.neotica.orpheum.source.SourceManager;
+import id.neotica.orpheum.utils.AudioCodecProbe;
 
 /**
  * MVP presenter owning the settings screen: profile, active source, version,
@@ -119,6 +120,12 @@ public class SettingsPresenter {
         }
     }
 
+    public void testAudioCodecs() {
+        if (view != null) {
+            view.renderCodecTest(AudioCodecProbe.probe(context));
+        }
+    }
+
     public void clearCoverCache() {
         new Thread(new Runnable() {
             @Override
@@ -130,7 +137,7 @@ public class SettingsPresenter {
                         success = false;
                     } else {
                         loader.clearMemoryCache();
-                        loader.clearDiskCache();
+                        loader.clearDiscCache();
                     }
                 } catch (Throwable t) {
                     success = false;

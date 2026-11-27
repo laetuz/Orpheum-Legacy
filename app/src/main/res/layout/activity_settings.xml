@@ -133,6 +133,21 @@
                 android:textSize="12sp"
                 android:paddingBottom="8dp" />
 
+            <Button
+                android:id="@+id/btn_settings_youtube_codecs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/youtube_test_codecs" />
+
+            <TextView
+                android:id="@+id/tv_settings_youtube_codecs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/youtube_codecs_not_run"
+                android:textSize="12sp"
+                android:paddingBottom="8dp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

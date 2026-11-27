@@ -31,6 +31,7 @@ public class SettingsActivity extends Activity implements SettingsView {
     private TextView tvSourceDetail;
     private TextView tvYoutubeStatus;
     private TextView tvYoutubeDiagnostics;
+    private TextView tvYoutubeCodecs;
     private EditText etYoutubeUrl;
     private TextView tvVersion;
     private TextView tvDownloads;
@@ -55,12 +56,14 @@ public class SettingsActivity extends Activity implements SettingsView {
         tvSourceDetail = (TextView) findViewById(R.id.tv_settings_source_detail);
         tvYoutubeStatus = (TextView) findViewById(R.id.tv_settings_youtube_status);
         tvYoutubeDiagnostics = (TextView) findViewById(R.id.tv_settings_youtube_diagnostics);
+        tvYoutubeCodecs = (TextView) findViewById(R.id.tv_settings_youtube_codecs);
         etYoutubeUrl = (EditText) findViewById(R.id.et_settings_youtube_url);
         etYoutubeUrl.clearFocus();
         tvVersion = (TextView) findViewById(R.id.tv_settings_version);
         tvDownloads = (TextView) findViewById(R.id.tv_settings_downloads);
         Button btnSwitchSource = (Button) findViewById(R.id.btn_switch_source);
         Button btnSaveYoutube = (Button) findViewById(R.id.btn_settings_youtube_save);
+        Button btnTestCodecs = (Button) findViewById(R.id.btn_settings_youtube_codecs);
         Button btnClearCache = (Button) findViewById(R.id.btn_clear_cover_cache);
         btnLogout = (Button) findViewById(R.id.btn_logout);
 
@@ -75,6 +78,13 @@ public class SettingsActivity extends Activity implements SettingsView {
             @Override
             public void onClick(View view) {
                 presenter.saveYouTubeListUrl(etYoutubeUrl.getText().toString());
+            }
+        });
+
+        btnTestCodecs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.testAudioCodecs();
             }
         });
 
@@ -150,6 +160,11 @@ public class SettingsActivity extends Activity implements SettingsView {
     @Override
     public void renderYouTubeDiagnostics(String report) {
         tvYoutubeDiagnostics.setText(report);
+    }
+
+    @Override
+    public void renderCodecTest(String result) {
+        tvYoutubeCodecs.setText(result);
     }
 
     @Override

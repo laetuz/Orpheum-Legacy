@@ -19,9 +19,7 @@ import android.widget.Toast;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
-import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 import java.util.ArrayList;
 
@@ -122,7 +120,7 @@ public class PlayerActivity extends Activity implements PlayerView {
         coverSizePx = getResources().getDimensionPixelSize(R.dimen.player_cover_size);
         coverOptions = new DisplayImageOptions.Builder()
                 .displayer(new CircularBitmapDisplayer(coverSizePx))
-                .cacheInMemory(true)
+                .cacheInMemory()
                 .build();
 
         presenter = new PlayerPresenter(this);
@@ -224,9 +222,8 @@ public class PlayerActivity extends Activity implements PlayerView {
 
         ImageLoader.getInstance().displayImage(
                 ImageUrlHelper.build(track.albumCover),
-                new ImageViewAware(ivCover),
+                ivCover,
                 coverOptions,
-                new ImageSize(coverSizePx, coverSizePx),
                 new SimpleImageLoadingListener() {
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
@@ -238,8 +235,7 @@ public class PlayerActivity extends Activity implements PlayerView {
                         coverAvailable = false;
                         stopSpin();
                     }
-                },
-                null);
+                });
 
         updateFavoriteIcon();
     }

@@ -81,6 +81,8 @@
     <string name="youtube_instances_not_loaded">Not loaded</string>
     <string name="youtube_diagnostics">Diagnostics</string>
     <string name="youtube_diagnostics_none">No YouTube playback attempt yet.</string>
+    <string name="youtube_test_codecs">Test audio codecs</string>
+    <string name="youtube_codecs_not_run">Codec test: not run yet</string>
 
     <!-- Home -->
     <string name="home_recent_albums">Recent Albums</string>

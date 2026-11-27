@@ -370,7 +370,7 @@ public final class YouTubeManager {
                 throw new IOException("Cannot extract audio track: " + message(t));
             }
         }
-        result.source = target.getAbsolutePath();
+        result.source = "file://" + target.getAbsolutePath();
         result.filePath = target.getAbsolutePath();
         pruneCache(dir);
         return result;
