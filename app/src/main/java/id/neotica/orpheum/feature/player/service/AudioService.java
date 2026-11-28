@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -131,38 +132,39 @@ public class AudioService extends Service implements PlaybackManager.PlaybackLis
         PendingIntent contentPending = PendingIntent.getActivity(this, 0, openIntent, 0);
 
         if (SdkCompat.atLeast(11)) {
-            Notification.Builder builder = new Notification.Builder(this)
-                    .setSmallIcon(android.R.drawable.ic_media_play)
-                    .setContentTitle(title)
-                    .setContentText(artist)
-                    .setContentIntent(contentPending)
-                    .setOngoing(true);
-
+            PendingIntent playPausePending = null;
+            PendingIntent nextPending = null;
             if (SdkCompat.atLeast(16)) {
                 Intent playPauseIntent = new Intent(ACTION_PLAY_PAUSE);
-                PendingIntent playPausePending = PendingIntent.getBroadcast(this, 1, playPauseIntent,
+                playPausePending = PendingIntent.getBroadcast(this, 1, playPauseIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
-                builder.addAction(
-                        PlaybackManager.isPlaying() ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play,
-                        PlaybackManager.isPlaying() ? "Pause" : "Play",
-                        playPausePending);
 
                 Intent nextIntent = new Intent(ACTION_NEXT);
-                PendingIntent nextPending = PendingIntent.getBroadcast(this, 2, nextIntent,
+                nextPending = PendingIntent.getBroadcast(this, 2, nextIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
-                builder.addAction(android.R.drawable.ic_media_next, "Next", nextPending);
             }
 
-            return builder.getNotification();
-        } else {
-            Notification notification = new Notification(
-                    android.R.drawable.ic_media_play,
-                    title,
-                    System.currentTimeMillis());
-            notification.setLatestEventInfo(this, title, artist, contentPending);
-            notification.flags |= Notification.FLAG_ONGOING_EVENT;
-            return notification;
+            try {
+                Class<?> clazz = Class.forName(
+                        "id.neotica.orpheum.feature.player.service.NotificationApi11");
+                Method build = clazz.getMethod("build",
+                        Context.class, String.class, String.class, PendingIntent.class,
+                        boolean.class, PendingIntent.class, PendingIntent.class);
+                return (Notification) build.invoke(null, this, title, artist,
+                        contentPending, Boolean.valueOf(PlaybackManager.isPlaying()),
+                        playPausePending, nextPending);
+            } catch (Throwable t) {
+                // Fall back to the legacy notification below
+            }
         }
+
+        Notification notification = new Notification(
+                android.R.drawable.ic_media_play,
+                title,
+                System.currentTimeMillis());
+        notification.setLatestEventInfo(this, title, artist, contentPending);
+        notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        return notification;
     }
 
     private void updateNotification() {
