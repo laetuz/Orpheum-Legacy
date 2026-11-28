@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import java.lang.reflect.Method;
 
 import id.neotica.orpheum.feature.player.PlaybackManager;
+import id.neotica.orpheum.feature.player.ui.PlayerActivity;
 import id.neotica.orpheum.model.Track;
 import id.neotica.orpheum.utils.SdkCompat;
 
@@ -26,11 +27,6 @@ public class AudioService extends Service implements PlaybackManager.PlaybackLis
 
     public static final String ACTION_PLAY_PAUSE = "id.neotica.orpheum.action.PLAY_PAUSE";
     public static final String ACTION_NEXT = "id.neotica.orpheum.action.NEXT";
-
-    private static final String PLAYER_ACTIVITY =
-            "id.neotica.orpheum.feature.player.ui.PlayerActivity";
-    private static final String NOTIFICATION_HELPER =
-            "id.neotica.orpheum.utils.NotificationApi11";
 
     private static final Class<?>[] START_FOREGROUND_SIG = new Class[] { int.class, Notification.class };
     private static final Class<?>[] STOP_FOREGROUND_SIG = new Class[] { boolean.class };
@@ -68,6 +64,12 @@ public class AudioService extends Service implements PlaybackManager.PlaybackLis
     @Override
     public void onStart(Intent intent, int startId) {
         handleStart();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        handleStart();
+        return START_STICKY;
     }
 
     private void handleStart() {
@@ -125,8 +127,7 @@ public class AudioService extends Service implements PlaybackManager.PlaybackLis
         String title = track != null ? track.title : "Orpheum";
         String artist = (track != null && !TextUtils.isEmpty(track.artistName)) ? track.artistName : "";
 
-        Intent openIntent = new Intent();
-        openIntent.setClassName(this, PLAYER_ACTIVITY);
+        Intent openIntent = new Intent(this, PlayerActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentPending = PendingIntent.getActivity(this, 0, openIntent, 0);
 
@@ -144,8 +145,9 @@ public class AudioService extends Service implements PlaybackManager.PlaybackLis
             }
 
             try {
-                Class<?> clazz = Class.forName(NOTIFICATION_HELPER);
-                Method build = clazz.getMethod("buildPlayback",
+                Class<?> clazz = Class.forName(
+                        "id.neotica.orpheum.feature.player.service.NotificationApi11");
+                Method build = clazz.getMethod("build",
                         Context.class, String.class, String.class, PendingIntent.class,
                         boolean.class, PendingIntent.class, PendingIntent.class);
                 return (Notification) build.invoke(null, this, title, artist,

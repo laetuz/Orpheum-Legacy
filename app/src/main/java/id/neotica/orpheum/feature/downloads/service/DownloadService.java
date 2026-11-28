@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -26,6 +25,7 @@ import java.util.Set;
 import id.neotica.orpheum.R;
 import id.neotica.orpheum.feature.downloads.DownloadStore;
 import id.neotica.orpheum.feature.downloads.domain.DownloadedAlbum;
+import id.neotica.orpheum.feature.downloads.ui.DownloadsActivity;
 import id.neotica.orpheum.model.Track;
 import id.neotica.orpheum.utils.Constants;
 import id.neotica.orpheum.utils.ImageUrlHelper;
@@ -47,11 +47,6 @@ public class DownloadService extends Service {
     public static final String EXTRA_TOTAL = "total";
 
     private static final int NOTIFICATION_ID = 2000;
-
-    private static final String DOWNLOADS_ACTIVITY =
-            "id.neotica.orpheum.feature.downloads.ui.DownloadsActivity";
-    private static final String NOTIFICATION_HELPER =
-            "id.neotica.orpheum.utils.NotificationApi11";
 
     private static final Class<?>[] START_FOREGROUND_SIG = new Class[] { int.class, Notification.class };
     private static final Class<?>[] STOP_FOREGROUND_SIG = new Class[] { boolean.class };
@@ -95,6 +90,12 @@ public class DownloadService extends Service {
     @Override
     public void onStart(Intent intent, int startId) {
         handleIntent(intent);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        handleIntent(intent);
+        return START_STICKY;
     }
 
     @Override
@@ -260,12 +261,7 @@ public class DownloadService extends Service {
         InputStream in = null;
         OutputStream out = null;
         try {
-            URL url = new URL(urlString);
-            String protocol = url.getProtocol();
-            if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
-                throw new IOException("Unsupported URL scheme: " + protocol);
-            }
-            connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) new URL(urlString).openConnection();
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(15000);
 
@@ -339,22 +335,22 @@ public class DownloadService extends Service {
             text = getString(R.string.downloads_progress, done, total);
         }
 
-        Intent openIntent = new Intent();
-        openIntent.setClassName(this, DOWNLOADS_ACTIVITY);
+        Intent openIntent = new Intent(this, DownloadsActivity.class);
         openIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
 
         if (SdkCompat.atLeast(11)) {
-            try {
-                Class<?> clazz = Class.forName(NOTIFICATION_HELPER);
-                Method build = clazz.getMethod("buildDownload",
-                        Context.class, String.class, String.class, PendingIntent.class,
-                        int.class, int.class, boolean.class);
-                return (Notification) build.invoke(null, this, title, text, contentIntent,
-                        Integer.valueOf(done), Integer.valueOf(total), Boolean.valueOf(failed));
-            } catch (Throwable t) {
-                // Fall back to the legacy notification below
+            Notification.Builder builder = new Notification.Builder(this)
+                    .setSmallIcon(android.R.drawable.stat_sys_download)
+                    .setContentTitle(title)
+                    .setContentText(text)
+                    .setContentIntent(contentIntent)
+                    .setOngoing(true);
+
+            if (!failed && total > 0) {
+                builder.setProgress(total, done, false);
             }
+            return builder.getNotification();
         }
 
         Notification notification = new Notification(
